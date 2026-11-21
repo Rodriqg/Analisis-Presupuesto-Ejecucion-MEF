@@ -1,0 +1,371 @@
+# =============================================================================
+# config.yaml — configuración única del proyecto (D-009)
+# Secciones: proyecto · rutas · anios · descarga · spark · fuentes · reglas_calidad
+# Rutas relativas a la raíz del proyecto (donde están este archivo y ARQUITECTURA.md).
+# Los notebooks lo leen con src.config (cargar_config, cargar_fuentes, cargar_reglas, ruta).
+# =============================================================================
+
+proyecto:
+  nombre: "Presupuesto y Ejecución de Ingresos Municipales (MEF)"
+  alcance_nivel_gobierno: "M"              # NIVEL_GOBIERNO del SIAF: M = Gobierno Local (confirmar en el perfilado)
+
+rutas:
+  bronze: data/bronze
+  silver: data/silver
+  gold: data/gold
+  quarantine: data/quarantine      # filas que fallan reglas críticas, con su motivo
+  auditoria: data/auditoria        # consolidado de bitácoras y calidad Bronze → Gold (Parquet)
+  muestras: data/_muestras          # CSV pequeños para pruebas (no son datos del proyecto)
+  manifest: data/bronze/manifest.json
+  # Cada capa escribe su bitácora en data/<capa>/bitacora_ejecuciones.jsonl
+
+# Rango de años (D-005, D-006). 2026 es año parcial (en curso).
+anios:
+  inicio: 2009
+  fin: 2026
+  parcial: [2026]
+  renamu_analisis: [2020, 2026]   # Bronze guarda 2009-2026; Silver usa este rango (D-011)
+
+descarga:
+  timeout_conexion_s: 20
+  timeout_lectura_s: 300
+  chunk_mb: 4
+  reintentos: 3
+  user_agent: "Mozilla/5.0 (proyecto academico BI)"
+
+# Parámetros de Spark (modo local). Equipo de desarrollo: 12 núcleos, ~7.6 GB RAM (WSL2).
+spark:
+  app_name: "ingresos_municipales"
+  master: "local[*]"
+  driver_memory: "4g"               # dejar margen para el SO y Jupyter
+  shuffle_partitions: 24            # ~2x núcleos; ajustar al ver el volumen real
+  timezone: "America/Lima"
+  log_level: "WARN"
+  config_extra:
+    spark.sql.ansi.enabled: "false"           # Bronze/Silver: no fallar por casts inválidos, se miden con reglas de calidad
+    spark.sql.parquet.compression.codec: "snappy"
+    spark.ui.showConsoleProgress: "false"
+
+# =============================================================================
+# FUENTES — catálogo de descargas a Bronze (lo usa 01_bronze_descarga)
+# Destino de cada archivo: data/bronze/<carpeta_bronze>/<AAAA-MM-DD>/[<subcarpeta>/]<archivo>
+#
+# Decisiones de alcance: docs/decisiones.md (D-005 a D-007)
+#
+# estado_url:
+#   verificada  -> respondió HTTP 200 el 2026-11-20
+#   pendiente   -> URL no encontrada; se resuelve a mano (ver docs/decisiones.md)
+#   manual      -> no hay descarga automática; se copia a la carpeta y el notebook lo registra
+# =============================================================================
+fuentes:
+
+  # ---------------------------------------------------------------------------
+  F1:
+    nombre: "SIAF — Presupuesto y ejecución de ingreso"
+    pagina: "https://datosabiertos.mef.gob.pe/dataset/presupuesto-y-ejecucion-de-ingreso"
+    carpeta_bronze: siaf_ingreso
+    tipo: descarga
+    url_base: "https://fs.datosabiertos.mef.gob.pe/datastorefiles"
+    # Grano mensual en todos los archivos (columna MES_DOC). 'Diario' = frecuencia de
+    # actualización, no grano. 2025-2026 se toman del archivo Diario (D-005).
+    archivos:
+      - { anios: [2009, 2024], plantilla: "{anio}-Ingreso.csv",        estado_url: verificada }
+      - { anios: [2025, 2026], plantilla: "{anio}-Ingreso-Diario.csv", estado_url: verificada }
+    descartados:
+      - { plantilla: "{anio}-Ingreso-Mensual.csv", anios: [2025, 2026], motivo: "2025 idéntico al Diario; 2026 desactualizado (D-005)" }
+    diccionario:
+      estado_url: pendiente      # Ingresos_Diccionario.csv -> HTTP 404. Descargar a mano desde la página del dataset.
+
+  # ---------------------------------------------------------------------------
+  F2:
+    nombre: "SISMEPRE — Seguimiento de la meta del impuesto predial"
+    pagina: "https://datosabiertos.mef.gob.pe/dataset/seguimiento-de-la-meta-del-impuesto-predial"
+    carpeta_bronze: sismepre_predial
+    tipo: descarga
+    url_base: "https://fs.datosabiertos.mef.gob.pe/datastorefiles"
+    archivos:
+      - { archivo: rentas_preguntas.csv,            estado_url: verificada }
+      - { archivo: rentas_estadistica.csv,          estado_url: verificada }
+      - { archivo: rentas_formulario.csv,           estado_url: verificada }
+      - { archivo: rentas_esat_estadistica_atm.csv, estado_url: verificada }
+      - { archivo: rentas_respuestas.csv,           estado_url: verificada }
+      - { archivo: rentas_ano_aplicacion.csv,       estado_url: verificada }
+      - { archivo: rentas_entidad_estado.csv,       estado_url: verificada }   # contiene CORREO (dato personal): eliminar en Silver
+    diccionario:
+      estado_url: pendiente      # rentas_*_diccionario.csv -> HTTP 404. Error de página.
+
+  # ---------------------------------------------------------------------------
+  F3:
+    nombre: "RENAMU (INEI) — ediciones 2009 a 2026"
+    pagina: "https://www.datosabiertos.gob.pe/dataset/registro-nacional-de-municipalidades-renamu-2022-instituto-nacional-de-estad%C3%ADstica-e"
+    carpeta_bronze: renamu
+    tipo: descarga
+    descomprimir_zip: true       # se guarda el ZIP y se descomprime en la misma carpeta
+    # Bronze guarda todas las ediciones; el análisis usa 2020-2026 (D-006, D-011).
+    # Cada edición se guarda en una subcarpeta con su año: renamu/<fecha>/<edicion>/
+    anios_analisis: [2020, 2026]
+    archivos:
+      - { anios: [2009, 2024], subcarpeta: "{anio}", archivo: "{anio}.zip",
+          url: "https://www.inei.gob.pe/media/DATOS_ABIERTOS/RENAMU/DATA/{anio}.zip", estado_url: verificada }
+      - { anio: 2025, subcarpeta: "2025", archivo: "2025_F01_municipalidades.zip",
+          url: "https://proyectos.inei.gob.pe/iinei/srienaho/descarga/CSV/984-Modulo1963.zip", estado_url: verificada,
+          nota: "Formulario 01: municipalidades provinciales y distritales" }
+      - { anio: 2025, subcarpeta: "2025", archivo: "2025_F02_centros_poblados.zip",
+          url: "https://proyectos.inei.gob.pe/iinei/srienaho/descarga/CSV/985-Modulo1964.zip", estado_url: verificada,
+          nota: "Formulario 02: municipalidades de centros poblados" }
+      - { anio: 2026, subcarpeta: "2026", archivo: "2026.zip",
+          url: "https://proyectos.inei.gob.pe/iinei/srienaho/descarga/CSV/1049-Modulo1963.zip", estado_url: verificada,
+          nota: "Formulario 01 de la edición 2026 (agregado por el usuario)" }
+        
+# =============================================================================
+# REGLAS DE CALIDAD
+#
+# Campos de cada regla:
+#   id          : <CAPA>-<FUENTE>-<NNN>   p. ej. BRZ-F1-001, SLV-F1-003
+#   dimension   : completitud | unicidad | validez | consistencia | integridad | exactitud | oportunidad
+#   capa        : bronze | silver | gold
+#   fuente      : F1 | F2 | F3 | F4 | todas
+#   descripcion : qué se verifica, en lenguaje de negocio
+#   regla       : expresión verificable (SQL de Spark o descripción precisa)
+#   severidad   : critica | alta | media | baja
+#   accion      : cuarentena | registrar | detener
+#                 (critica -> cuarentena o detener; el resto -> registrar)
+#   fase_alta   : fase en la que se agregó la regla
+#
+# Resultados de cada ejecución -> data/control/ (ejecución, regla, filas evaluadas, filas fallidas, estado)
+# =============================================================================
+reglas_calidad:
+  # ---------------------------------------------------------------------------
+  # Reglas de Bronze 
+  # ---------------------------------------------------------------------------
+  - id: BRZ-TODAS-001
+    dimension: completitud
+    capa: bronze
+    fuente: TODAS
+    descripcion: "Todos los recursos automáticos tienen su descarga registrada y el archivo existe en disco"
+    regla: "URL del recurso presente en manifest y archivo existente"
+    severidad: critica
+    accion: cuarentena
+    fase_alta: 1
+
+  - id: BRZ-TODAS-002
+    dimension: integridad
+    capa: bronze
+    fuente: TODAS
+    descripcion: "El SHA-256 del archivo en disco coincide con el registrado en el manifest"
+    regla: "sha256_archivo(ruta) = manifest.sha256"
+    severidad: critica
+    accion: cuarentena
+    fase_alta: 1
+
+  - id: BRZ-TODAS-003
+    dimension: validez
+    capa: bronze
+    fuente: TODAS
+    descripcion: "Ningún archivo descargado está vacío o contiene una respuesta HTML"
+    regla: "bytes > 0 AND NOT es_html(archivo)"
+    severidad: critica
+    accion: cuarentena
+    fase_alta: 1
+
+  - id: BRZ-TODAS-004
+    dimension: completitud
+    capa: bronze
+    fuente: TODAS
+    descripcion: "Todas las fuentes de carga manual están presentes en el manifest"
+    regla: "Cada recurso manual tiene un registro en manifest.archivos"
+    severidad: critica
+    accion: cuarentena
+    fase_alta: 1
+  # ---------------------------------------------------------------------------
+  # Reglas propuestas para SILVER
+  # ---------------------------------------------------------------------------
+  - id: SLV-F1-001
+    dimension: validez
+    capa: silver
+    fuente: F1
+    descripcion: "Montos PIA, PIM y recaudado convertibles a decimal(18,2)"
+    regla: "try_cast(MONTO_* as decimal(18,2)) IS NOT NULL"
+    severidad: critica
+    accion: cuarentena
+    fase_alta: 1
+
+  - id: SLV-F1-002
+    dimension: validez
+    capa: silver
+    fuente: F1
+    descripcion: "Año y mes válidos: ANO_DOC = año del archivo y MES_DOC entre 1 y 12"
+    regla: "ANO_DOC = anio_archivo AND MES_DOC BETWEEN 1 AND 12"
+    severidad: critica
+    accion: cuarentena
+    fase_alta: 1
+
+  - id: SLV-F1-003
+    dimension: validez
+    capa: silver
+    fuente: F1
+    descripcion: "UBIGEO de 6 dígitos tras completar con ceros los códigos de departamento, provincia y distrito"
+    regla: "lpad(DEP,2,'0')||lpad(PROV,2,'0')||lpad(DIST,2,'0') RLIKE '^[0-9]{6}$'"
+    severidad: critica
+    accion: cuarentena
+    fase_alta: 1
+
+  - id: SLV-F1-004
+    dimension: consistencia
+    capa: silver
+    fuente: F1
+    descripcion: "Alcance: solo NIVEL_GOBIERNO = 'M' y ejecutoras que son municipalidades (se excluyen mancomunidades)"
+    regla: "NIVEL_GOBIERNO = 'M' AND EJECUTORA_NOMBRE LIKE 'MUNICIPALIDAD%' (las excluidas se cuentan, no se pierden en silencio)"
+    severidad: alta
+    accion: registrar
+    fase_alta: 1
+
+  - id: SLV-F1-005
+    dimension: unicidad
+    capa: silver
+    fuente: F1
+    descripcion: "Llave de negocio única: año, mes, SEC_EJEC, fuente, rubro, tipo de recurso y clasificador completo"
+    regla: "count(*) = count(distinct llave); los duplicados se consolidan sumando montos"
+    severidad: alta
+    accion: registrar
+    fase_alta: 1
+
+  - id: SLV-F1-006
+    dimension: consistencia
+    capa: silver
+    fuente: F1
+    descripcion: "Un SEC_EJEC tiene un solo UBIGEO por año"
+    regla: "count(distinct ubigeo) = 1 por (anio, SEC_EJEC)"
+    severidad: alta
+    accion: registrar
+    fase_alta: 1
+
+  - id: SLV-F1-007
+    dimension: exactitud
+    capa: silver
+    fuente: F1
+    descripcion: "Recaudado negativo (devoluciones/extornos): se conserva y se mide"
+    regla: "MONTO_RECAUDADO < 0"
+    severidad: baja
+    accion: registrar
+    fase_alta: 1
+
+  - id: SLV-F1-008
+    dimension: exactitud
+    capa: silver
+    fuente: F1
+    descripcion: "Cuadre: suma de montos de Silver = suma de Bronze filtrado (por año y nivel M)"
+    regla: "sum(silver.monto) + sum(cuarentena.monto) = sum(bronze_filtrado.monto)"
+    severidad: critica
+    accion: detener
+    fase_alta: 1
+
+  - id: SLV-F2-001
+    dimension: validez
+    capa: silver
+    fuente: F2
+    descripcion: "Filas de rentas_respuestas con estructura CSV inválida (comillas sin escapar)"
+    regla: "_corrupt_record IS NOT NULL"
+    severidad: critica
+    accion: cuarentena
+    fase_alta: 1
+
+  - id: SLV-F2-002
+    dimension: consistencia
+    capa: silver
+    fuente: F2
+    descripcion: "CLASIFICACION (A-G) única por municipalidad desde 2019 (base de clasificacion_pi, D-008)"
+    regla: "count(distinct CLASIFICACION) = 1 por SEC_EJEC donde ANO_APLICACION >= 2019"
+    severidad: alta
+    accion: registrar
+    fase_alta: 1
+
+  - id: SLV-F2-003
+    dimension: integridad
+    capa: silver
+    fuente: F2
+    descripcion: "Todo SEC_EJEC del SISMEPRE existe como municipalidad en el SIAF"
+    regla: "SEC_EJEC IN (silver_siaf.SEC_EJEC)"
+    severidad: critica
+    accion: cuarentena
+    fase_alta: 1
+
+  - id: SLV-TODAS-001
+    dimension: validez
+    capa: silver
+    fuente: todas
+    descripcion: "Privacidad: no pasan a Silver datos personales (CORREO, USUARIO_ENVIO_ID del SISMEPRE; nombres, correos y teléfonos del directorio RENAMU)"
+    regla: "ninguna columna de la lista de sensibles existe en las tablas de Silver"
+    severidad: critica
+    accion: detener
+    fase_alta: 1
+
+  - id: SLV-F3-001
+    dimension: unicidad
+    capa: silver
+    fuente: F3
+    descripcion: "UBIGEO único por edición del RENAMU"
+    regla: "count(*) = count(distinct ubigeo) por edicion"
+    severidad: critica
+    accion: detener
+    fase_alta: 1
+
+  - id: SLV-F3-002
+    dimension: validez
+    capa: silver
+    fuente: F3
+    descripcion: "Tipomuni en {1 = Provincial, 2 = Distrital}"
+    regla: "Tipomuni IN ('1','2')"
+    severidad: critica
+    accion: cuarentena
+    fase_alta: 1
+
+  - id: SLV-X-001
+    dimension: integridad
+    capa: silver
+    fuente: todas
+    descripcion: "Municipalidades del SIAF sin RENAMU en su edición (distritos nuevos) se marcan 'No especificado', no se descartan"
+    regla: "ubigeo SIAF NOT IN ubigeo RENAMU(edición) => atributos RENAMU = 'No especificado'"
+    severidad: media
+    accion: registrar
+    fase_alta: 1
+
+  - id: SLV-F2-004
+    dimension: integridad
+    capa: silver
+    fuente: F2
+    descripcion: "Combinaciones año + periodo + formulario del ESAT presentes en el catálogo de formularios (90 % en Bronze)"
+    regla: "(ANO_APLICACION, PERIODO, FORMULARIO_ID) IN sismepre_formulario"
+    severidad: media
+    accion: registrar
+    fase_alta: 1
+
+  - id: SLV-F3-003
+    dimension: validez
+    capa: silver
+    fuente: F3
+    descripcion: "Filas del RENAMU sin UBIGEO válido (filas vacías en los módulos de 2020)"
+    regla: "ubigeo RLIKE '^[0-9]{6}$'"
+    severidad: critica
+    accion: cuarentena
+    fase_alta: 1
+
+  - id: SLV-F3-004
+    dimension: consistencia
+    capa: silver
+    fuente: todas
+    descripcion: "El tipo de municipalidad del RENAMU (Tipomuni) coincide con el del nombre de la ejecutora en el SIAF"
+    regla: "Tipomuni=1 <=> SIAF PROVINCIAL/METROPOLITANA; Tipomuni=2 <=> SIAF DISTRITAL"
+    severidad: media
+    accion: registrar
+    fase_alta: 1
+
+  - id: SLV-TODAS-002
+    dimension: completitud
+    capa: silver
+    fuente: todas
+    descripcion: "Cuadre de filas por tabla: filas de Bronze = filas de Silver + filas en cuarentena (+ fuera de alcance contadas)"
+    regla: "bronze = silver + cuarentena (+ fuera_de_alcance)"
+    severidad: critica
+    accion: detener
+    fase_alta: 1

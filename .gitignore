@@ -1,0 +1,23 @@
+# Entorno
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Datos: se regeneran ejecutando los notebooks (Bronze se descarga, el resto se calcula).
+# Sí se versionan, en cada capa: notebooks, .md, manifest y bitácora.
+data/bronze/*/
+data/silver/*/
+data/gold/*/
+data/quarantine/*
+data/auditoria/*
+!data/**/.gitkeep
+
+# Artefactos de Spark
+spark-warehouse/
+metastore_db/
+derby.log
+_spark_warehouse/
+
+# Power BI (archivos pesados; versionar solo si el curso lo pide)
+*.pbix.bak

@@ -1,0 +1,25 @@
+# Python 3.14 + Java 17/21 (requisito de PySpark 4.x)
+# Instalar: python -m venv .venv && .venv/bin/pip install -r requirements.txt
+
+# Procesamiento
+pyspark==4.3.0
+pyarrow==26.0.1
+pandas==3.1.1            # PySpark 4.3 avisa que pandas 3 no está 100% soportado; no se usa en la conversión Spark<->pandas
+openpyxl==3.1.5          # lectura de .xlsx
+
+# Ingesta y configuración
+requests==2.34.2
+PyYAML==6.0.3
+tqdm==4.70.1
+python-dotenv==1.2.4
+
+# Notebooks y orquestación
+ipykernel==7.4.0
+nbformat==5.11.1
+nbclient==0.11.0         # 00_orquestador ejecuta los notebooks en orden
+
+pypdf==7.1.1             # lectura de diccionarios PDF del RENAMU (perfilado)
+matplotlib==3.11.2       # gráficos en los notebooks
+
+# Exploración rápida (opcional, no forma parte del pipeline)
+duckdb==2.0.1
