@@ -18,6 +18,11 @@ spark-warehouse/
 metastore_db/
 derby.log
 _spark_warehouse/
+.spark_tmp/
 
 # Power BI (archivos pesados; versionar solo si el curso lo pide)
 *.pbix.bak
+
+# Documentos de trabajo (no se publican)
+DECISIONES.md
+DECISIONES_RESUMEN.md

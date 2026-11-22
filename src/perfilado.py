@@ -75,40 +75,38 @@ def a_pandas(df: DataFrame) -> pd.DataFrame:
 
 
 # --------------------------------------------------------------------------- perfil de columnas
-def perfil_columnas(df: DataFrame, fuente: str, tabla: str, numericas: list[str] | None = None) -> pd.DataFrame:
-    """Una pasada sobre el DataFrame: nulos, vacíos, distintos (aprox.), longitudes y,
-    para columnas numéricas, % parseable, mínimo y máximo."""
-    numericas = numericas or []
+def perfil_columnas(df: DataFrame, fuente: str, tabla: str) -> pd.DataFrame:
+    """Una pasada sobre el DataFrame: nulos, vacíos, distintos (aprox.), longitudes y qué contiene
+    cada columna: `números` (todos los valores con dato son numéricos: montos o códigos),
+    `texto` (nombres u otros textos) o `mixto` (parte números, parte texto)."""
     exprs = [F.count(F.lit(1)).alias("__filas")]
     for c in df.columns:
         col = F.col(f"`{c}`")
         vacio = col.isNull() | (F.trim(col) == "")
+        num = F.regexp_replace(F.trim(col), ",", "")
         exprs += [
             F.sum(col.isNull().cast("long")).alias(f"{c}__nulos"),
             F.sum((~col.isNull() & (F.trim(col) == "")).cast("long")).alias(f"{c}__vacios"),
             F.approx_count_distinct(col, 0.02).alias(f"{c}__distintos"),
             F.min(F.length(col)).alias(f"{c}__lmin"),
             F.max(F.length(col)).alias(f"{c}__lmax"),
+            F.sum((~vacio & ~num.rlike(RE_NUMERO)).cast("long")).alias(f"{c}__texto"),
         ]
-        if c in numericas:
-            num = F.regexp_replace(F.trim(col), ",", "")
-            exprs += [
-                F.sum((~vacio & ~num.rlike(RE_NUMERO)).cast("long")).alias(f"{c}__no_numericos"),
-                F.min(num.cast("double")).alias(f"{c}__min"),
-                F.max(num.cast("double")).alias(f"{c}__max"),
-            ]
     r = df.agg(*exprs).first().asDict()
     n = r["__filas"]
     filas = []
     for c in df.columns:
+        con_dato = n - r[f"{c}__nulos"] - r[f"{c}__vacios"]
+        texto = r[f"{c}__texto"]
+        contenido = ("vacía" if con_dato == 0 else "números" if texto == 0
+                     else "texto" if texto == con_dato else f"mixto ({texto:,} con texto)")
         filas.append({
             "fuente": fuente, "tabla": tabla, "columna": c, "filas": n,
             "nulos": r[f"{c}__nulos"], "vacios": r[f"{c}__vacios"],
-            "pct_nulo_o_vacio": round(100 * (r[f"{c}__nulos"] + r[f"{c}__vacios"]) / n, 2) if n else None,
+            "pct_nulo_o_vacio": round(100 * (n - con_dato) / n, 2) if n else None,
             "distintos_aprox": r[f"{c}__distintos"],
             "largo_min": r[f"{c}__lmin"], "largo_max": r[f"{c}__lmax"],
-            "no_numericos": r.get(f"{c}__no_numericos"),
-            "min": r.get(f"{c}__min"), "max": r.get(f"{c}__max"),
+            "contenido": contenido,
         })
     return pd.DataFrame(filas)
 

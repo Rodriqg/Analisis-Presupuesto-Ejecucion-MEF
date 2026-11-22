@@ -48,7 +48,8 @@ spark:
 
 # =============================================================================
 # FUENTES — catálogo de descargas a Bronze (lo usa 01_bronze_descarga)
-# Destino de cada archivo: data/bronze/<carpeta_bronze>/<AAAA-MM-DD>/[<subcarpeta>/]<archivo>
+# Destino de cada archivo: data/bronze/<carpeta_bronze>/[<subcarpeta>/]<archivo> (ruta fija, D-014).
+# Si el servidor publica una versión nueva, sobrescribe la anterior; la fecha queda en el manifest.
 #
 # Decisiones de alcance: docs/decisiones.md (D-005 a D-007)
 #
@@ -102,7 +103,7 @@ fuentes:
     tipo: descarga
     descomprimir_zip: true       # se guarda el ZIP y se descomprime en la misma carpeta
     # Bronze guarda todas las ediciones; el análisis usa 2020-2026 (D-006, D-011).
-    # Cada edición se guarda en una subcarpeta con su año: renamu/<fecha>/<edicion>/
+    # Cada edición se guarda en una subcarpeta con su año: renamu/<edicion>/
     anios_analisis: [2020, 2026]
     archivos:
       - { anios: [2009, 2024], subcarpeta: "{anio}", archivo: "{anio}.zip",
@@ -168,15 +169,6 @@ reglas_calidad:
     accion: cuarentena
     fase_alta: 1
 
-  - id: BRZ-TODAS-004
-    dimension: completitud
-    capa: bronze
-    fuente: TODAS
-    descripcion: "Todas las fuentes de carga manual están presentes en el manifest"
-    regla: "Cada recurso manual tiene un registro en manifest.archivos"
-    severidad: critica
-    accion: cuarentena
-    fase_alta: 1
   # ---------------------------------------------------------------------------
   # Reglas propuestas para SILVER
   # ---------------------------------------------------------------------------
@@ -304,18 +296,18 @@ reglas_calidad:
     dimension: unicidad
     capa: silver
     fuente: F3
-    descripcion: "UBIGEO único por edición del RENAMU"
-    regla: "count(*) = count(distinct ubigeo) por edicion"
+    descripcion: "UBIGEO único por edición del RENAMU (en su archivo)"
+    regla: "count(*) = count(distinct ubigeo) por edicion y archivo; las copias van todas a cuarentena"
     severidad: critica
-    accion: detener
+    accion: cuarentena
     fase_alta: 1
 
   - id: SLV-F3-002
     dimension: validez
     capa: silver
     fuente: F3
-    descripcion: "Tipomuni en {1 = Provincial, 2 = Distrital}"
-    regla: "Tipomuni IN ('1','2')"
+    descripcion: "Tipomuni en {1 = Provincial, 2 = Distrital}; 3 = Centro poblado es fuera de alcance (se cuenta); otro valor o vacío va a cuarentena"
+    regla: "Tipomuni IN ('1','2'); Tipomuni = '3' => fuera_de_alcance"
     severidad: critica
     accion: cuarentena
     fase_alta: 1
@@ -344,8 +336,8 @@ reglas_calidad:
     dimension: validez
     capa: silver
     fuente: F3
-    descripcion: "Filas del RENAMU sin UBIGEO válido (filas vacías en los módulos de 2020)"
-    regla: "ubigeo RLIKE '^[0-9]{6}$'"
+    descripcion: "Fila del RENAMU con UBIGEO válido (6 dígitos, sin departamento 00) y con datos (no vacía)"
+    regla: "ubigeo RLIKE '^[0-9]{6}$' AND ubigeo NOT LIKE '00%' AND NOT fila_vacia"
     severidad: critica
     accion: cuarentena
     fase_alta: 1
@@ -369,3 +361,33 @@ reglas_calidad:
     severidad: critica
     accion: detener
     fase_alta: 1
+
+  - id: SLV-F3-005
+    dimension: consistencia
+    capa: silver
+    fuente: F3
+    descripcion: "RENAMU finanzas: el total es la suma de sus categorías principales (ingresos I–IV, gastos I–III), con tolerancia de 1 sol por categoría (redondeo)"
+    regla: "abs(total - (cat_1 + cat_2 + cat_3 [+ cat_4])) <= n_categorias"
+    severidad: media
+    accion: registrar
+    fase_alta: 2
+
+  - id: SLV-F3-006
+    dimension: validez
+    capa: silver
+    fuente: F3
+    descripcion: "RENAMU finanzas: los montos son numéricos (coma o punto decimal) y no negativos"
+    regla: "monto IS NULL OR (cast(monto) IS NOT NULL AND monto >= 0)"
+    severidad: media
+    accion: registrar
+    fase_alta: 2
+
+  - id: SLV-F3-007
+    dimension: consistencia
+    capa: silver
+    fuente: F3
+    descripcion: "RENAMU finanzas: bandera de informante. Se registra la municipalidad que no informó el cuadro (VFI = 0) o cuya bandera viene vacía (sin respuesta), y si aun así trae montos mayores a 0"
+    regla: "estado IN ('NO_INFORMO','SIN_RESPUESTA') => alerta; se cuenta aparte si total > 0"
+    severidad: media
+    accion: registrar
+    fase_alta: 2

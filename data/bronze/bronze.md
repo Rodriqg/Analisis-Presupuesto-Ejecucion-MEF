@@ -6,7 +6,7 @@ Este documento acompaña a `01_bronze_descarga.ipynb` y `02_bronze_perfilado.ipy
 
 ## 01 — Descarga
 
-El notebook baja las 3 fuentes, las guarda tal cual en `data/bronze/<fuente>/<fecha>/` y registra cada archivo en `manifest.json` (URL, fecha, tamaño, sha256 y filas).
+El notebook baja las 3 fuentes y las guarda tal cual en una ruta fija, `data/bronze/<fuente>/[<edición>/]<archivo>`. `manifest.json` es el inventario de lo que hay hoy en Bronze: una entrada por archivo vigente con URL, fecha de descarga, `run_id`, tamaño, sha256 y filas (D-014).
 
 | Fuente | Contenido | Tamaño |
 | --- | --- | --- |
@@ -19,7 +19,8 @@ El notebook baja las 3 fuentes, las guarda tal cual en `data/bronze/<fuente>/<fe
 - **2025 y 2026 se toman del archivo *Diario*.** "Diario" indica la frecuencia de actualización, no el grano: ambos archivos traen los datos por mes. En 2025 el Mensual es idéntico al Diario (+2 filas). En 2026 el Mensual está desactualizado: es una foto del 22 de octubre y le faltan unos S/ 5 974 millones municipales. Por eso se descarta el Mensual (D-005).
 - **RENAMU 2026:** lo agregó el usuario (D-011).
 - **`CategoriasMunicipalidades.csv`:** se descartó porque no está disponible (D-008).
-- **Reejecución:** el notebook se puede volver a ejecutar sin riesgo. Lo que ya existe o no cambió en el servidor no se vuelve a descargar.
+- **Reejecución y sobrescritura (D-014):** el notebook se puede volver a ejecutar sin riesgo. Si el servidor informa el mismo tamaño y fecha, no se descarga. Si informa otra fecha pero el contenido es igual (mismo sha256), tampoco se reemplaza; pasa a diario con el SISMEPRE. Si hay una versión nueva, se baja a `.part`, se valida y sobrescribe la anterior (en el RENAMU también se vuelve a descomprimir). Si la descarga falla, la versión anterior queda intacta. Bronze guarda una sola versión de cada archivo y no crece con cada descarga.
+- **Bitácora y auditoría:** cada ejecución registra, por fuente, los archivos, las filas, los bytes y la fecha de los datos, más lo descargado en esa sesión. `data/auditoria/volumenes.parquet` junta esas mediciones de todas las capas.
 
 ---
 
@@ -59,8 +60,9 @@ Si se lee todo con UTF-8, las tildes y la ñ de las ediciones antiguas salen da�
 
 - **2026 llega hasta noviembre** (`mes_max = 11`), consistente con un año en curso.
 
-**2.3 Perfil de columnas.**
-- **Montos:** son 100 % numéricos, sin ningún valor que no se pueda convertir.
+**2.3 Perfil de columnas.** La columna `contenido` dice qué trae cada columna: *números* (montos o códigos), *texto* (nombres) o *mixto*.
+- **Montos:** son 100 % *números*, sin ningún valor que no se pueda convertir.
+- **Códigos:** casi todos son *números* (`SEC_EJEC`, `RUBRO`, `GENERICA`, …). `TIPO_RECURSO` es *mixto*: algunos códigos traen letras, así que en Silver se trata como texto.
 - **`SECTOR` y `PLIEGO`:** están vacíos en el 84 % de las filas. La tabla siguiente muestra que **son exactamente las filas del nivel M**: en Gobierno Local el SIAF no usa sector ni pliego. No es un error, pero estas columnas no sirven para municipalidades.
 - **Ubicación vacía:** hay 1 644 filas con el departamento, la provincia y el distrito en blanco. No son municipalidades: son ejecutoras nacionales y regionales, y 26 filas de mancomunidades en 2012. *Esto corrige una lectura anterior, que las interpretó como "códigos de un dígito".*
 - **Niveles de gobierno:** hay tres, **E (nacional) 6 %, R (regional) 10 % y M (local) 84 %**. Filtrar Gobierno Local reduce poco el volumen.
@@ -80,47 +82,41 @@ Si se lee todo con UTF-8, las tildes y la ñ de las ediciones antiguas salen da�
 
 ### 3. F2 SISMEPRE
 
-**3.1 Revisión general de columnas.** No hay diccionarios, así que primero se miró qué columnas comparten los 7 archivos:
-- De 80 columnas, **11 están en 2 o más archivos**.
-- Las que se repiten tienen **pocos valores distintos y largo fijo**: es el patrón de un código, no de un atributo.
-  - `ANO_APLICACION` (4 caracteres) y `PERIODO` (1 carácter) están en los 7 archivos.
-  - `FORMULARIO_ID` está en 5, `SEC_EJEC` (6 caracteres) en 3 y `PREGUNTA_ID` en 2.
+**3.1 Archivos.** El SISMEPRE son 7 tablas de un mismo sistema, y no todas sirven:
 
-> Se ve que **cada CSV tiene columnas clave para conectarse con los demás**. El SISMEPRE es un pequeño modelo relacional: un catálogo de años y periodos, formularios, preguntas, respuestas por municipalidad, estado de cada municipalidad y la estadística tributaria (ESAT).
-
-**3.2 Llaves.** Con esas columnas se buscó, archivo por archivo, la **combinación mínima que no se repite**:
-
-| Archivo | Llave encontrada | Qué representa |
+| Archivo | Qué es | Uso propuesto |
 | --- | --- | --- |
-| `ano_aplicacion` | año + periodo | Calendario de la meta |
-| `entidad_estado` | SEC_EJEC + año + periodo | Estado y clasificación de cada municipalidad en cada periodo |
-| `esat_estadistica_atm` | SEC_EJEC + año + periodo + año estadístico + formulario + mes | Estadística tributaria (emisión, recaudación del predial…) |
-| `estadistica` | año + periodo + formulario + año estadístico + mes | Catálogo de periodos estadísticos |
-| `formulario` | año + periodo + formulario | Catálogo de formularios |
-| `preguntas` | año + periodo + pregunta | Catálogo de preguntas: la pregunta no se repite entre formularios |
-| `respuestas` | SEC_EJEC + año + respuesta | Respuestas: `RESPUESTA_ID` es único por municipalidad y año |
+| `entidad_estado` | Municipalidad × año × periodo: estado de la meta y **CLASIFICACION A–G** | **Sí**: clasificación |
+| `esat_estadistica_atm` | Estadística del predial por municipalidad (emisión, base imponible, recaudación, contribuyentes, predios) | **Sí**: montos del predial |
+| `respuestas` | Respuesta de cada municipalidad a cada pregunta del formulario | Probablemente no |
+| `ano_aplicacion`, `estadistica`, `formulario`, `preguntas` | Catálogos (periodos, formularios, preguntas) | No: referencia |
 
-**3.3 Relaciones.** Al probar las uniones, todas encuentran el 100 % de sus llaves, salvo una:
-- Respuestas → preguntas → formularios.
-- Respuestas y ESAT → estado de la entidad.
-- Estado → calendario.
-- **La excepción:** el **ESAT encuentra solo 56 de 62 combinaciones (90 %) en el catálogo de formularios**. Son combinaciones de formularios que el catálogo no lista.
-  > **Sugerencia:** no exigir esa relación en Silver; registrarla como alerta.
-
-El ESAT también trae `UBIGEO`, con una relación **1 a 1 con `SEC_EJEC`** (1 128 ↔ 1 128). Es el puente directo hacia el RENAMU.
-
-**3.4 Estructura.**
-- **Filas mal formadas:** hay **9 en `rentas_respuestas.csv`**, por comillas sin escapar en los textos libres. Spark las detecta como registros corruptos.
-  > **Sugerencia:** enviarlas a cuarentena.
-- **Datos personales:** `entidad_estado` trae `CORREO` y `USUARIO_ENVIO_ID`. No se usan y **no pasan a Silver**.
+- **Filas mal formadas:** hay **9 en `rentas_respuestas.csv`**, por comillas sin escapar en los textos libres.
+- **Datos personales:** `entidad_estado` trae `CORREO` y `USUARIO_ENVIO_ID`. **No pasan a Silver**.
 - **Formatos:** las fechas vienen como `d/MM/yyyy HH:mm:ss`, y los vacíos son un espacio `' '`.
 
-**3.5 Clasificación A–G.**
-- **Origen:** `entidad_estado.CLASIFICACION` es la **Clasificación de Municipalidades del Programa de Incentivos del MEF**. Los conteos de 2019–2022 (A = 74, B = 122, C = 42, D = 129, E = 378) coinciden con los oficiales.
+**3.2 Llaves.** Cada archivo tiene una llave (la combinación mínima de columnas que identifica la fila) y **ninguno tiene duplicados** por su llave. Por ejemplo, `entidad_estado` = SEC_EJEC + año + periodo.
+
+**3.3 Conexión.**
+- **Todos** los archivos tienen `ANO_APLICACION + PERIODO`.
+- **Por dentro**, los catálogos se unen por `FORMULARIO_ID` y `PREGUNTA_ID`, y todas las uniones encuentran el 100 %.
+- **Hacia afuera**, `entidad_estado`, `esat_estadistica_atm` y `respuestas` traen `SEC_EJEC` (→ SIAF). `esat_estadistica_atm` trae además `UBIGEO` (→ RENAMU).
+
+**3.4 Clasificación A–G.**
+- **Origen:** la columna `CLASIFICACION` de `rentas_entidad_estado.csv`. Es la *Clasificación de Municipalidades del Programa de Incentivos* del MEF.
+- **Fuente oficial:** *Marco Conceptual del PI* (MEF, DGPP, dic. 2018, p. 27–28, <https://www.mef.gob.pe/contenidos/presu_publ/migl/pi/marco_conceptual_PI.pdf>):
+  - A = provinciales de ciudades principales (74);
+  - B = provinciales no pertenecientes a ciudades principales (122);
+  - C = distritales de Lima Metropolitana (42);
+  - D = distritales de otras ciudades principales (129);
+  - E = distritales no principales con ≥ 60 % de población urbana (378);
+  - F = distritales no principales con 30–60 % urbana (509);
+  - G = distritales no principales con < 30 % urbana (620).
+- **Conteos del SISMEPRE:** en 2019 coinciden con los oficiales en A–E.
 - **Estabilidad:** desde 2019 **ninguna municipalidad cambia de tipo**.
-- **Cobertura:** A–E están completos. F y G solo aparecen desde 2024, cuando entraron a la meta predial. En total, 1 449 municipalidades tienen tipo.
-- **Esquema anterior:** de 2013 a 2018 se usaba otro esquema (A, B, C).
-  > **Sugerencia:** usar la clasificación de 2019 en adelante como atributo fijo. A una municipalidad ausente asignarle "F/G (sin meta predial)" (D-008).
+- **F y G** aparecen en el SISMEPRE **desde 2024**, cuando esas municipalidades entraron a la meta del predial.
+- **Esquema anterior:** en 2013–2018 la columna trae otra clasificación (A, B y C, con otro significado).
+  > **Sugerencia:** usar la clasificación de 2019 en adelante como atributo fijo de la municipalidad. Una municipalidad que nunca aparece en el SISMEPRE queda "sin clasificación PI" (D-008).
 
 ### 4. F3 RENAMU
 
@@ -140,7 +136,7 @@ El ESAT también trae `UBIGEO`, con una relación **1 a 1 con `SEC_EJEC`** (1 12
 
 **4.2 Ediciones 2020–2026.**
 - **UBIGEO:** es **único por municipalidad** en todas las ediciones. En 2020 no hay columna `Ubigeo` y se arma con `ccdd + ccpp + ccdi`.
-- **2020:** está repartido en 19 módulos que se unen por ubicación. Dos de ellos (`C01` y `C08`) traen **8 filas vacías** sin código.
+- **2020:** está repartido en 19 módulos que se unen por ubicación. Dos de ellos traen **filas completamente vacías**: 5 en `C08` y 3 en `C01` (`filas_vacias` = 8). Por eso 4.1 muestra 1 879 filas y 4.2 muestra 1 874 municipalidades. **No son duplicados.**
   > **Sugerencia:** enviarlas a cuarentena.
 - **`Tipomuni`:** 1 = provincial (196), 2 = distrital (1 678 → 1 696). Es el atributo `tipo_municipalidad`.
 - **Tabla de ingresos C96:** está en todas las ediciones, con 57 columnas (64 en 2026). **El dato corresponde al año anterior a la edición**: el RENAMU 2026 informa los ingresos de 2025.
@@ -151,8 +147,8 @@ El ESAT también trae `UBIGEO`, con una relación **1 a 1 con `SEC_EJEC`** (1 12
 | Prueba | Resultado |
 | --- | --- |
 | SIAF ↔ RENAMU por UBIGEO (mismo año) | **99,15–100 %**. Faltan 16 municipalidades en 2021–2022 y 1 en 2025: distritos creados después de la edición del RENAMU |
-| SIAF ↔ SISMEPRE por SEC_EJEC | **1 449 de 1 449** municipalidades del SISMEPRE existen en el SIAF |
-| Puente SEC_EJEC → UBIGEO | El del SISMEPRE (ESAT) coincide con el del SIAF en **1 128 de 1 128** |
+| SIAF ↔ SISMEPRE por SEC_EJEC (2019–2026, por año) | **100 %** de las municipalidades del SISMEPRE existen en el SIAF todos los años (`solo_SISMEPRE` = 0). El SISMEPRE cubre solo a las que tienen meta del predial: 745 (2019–2022) → 1 354 (2026) |
+| Puente SEC_EJEC → UBIGEO (ESAT) | Coincide con el SIAF en el **100 %** de los pares de cada año. **2020 no tiene datos en el ESAT** |
 
 ---
 

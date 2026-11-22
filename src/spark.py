@@ -8,7 +8,7 @@ import warnings
 
 from pyspark.sql import SparkSession
 
-from src.config import cargar_config, ruta
+from src.config import cargar_config, raiz_proyecto, ruta
 
 
 def crear_sesion(app_name: str | None = None) -> SparkSession:
@@ -32,6 +32,8 @@ def crear_sesion(app_name: str | None = None) -> SparkSession:
         .config("spark.sql.shuffle.partitions", str(cfg["shuffle_partitions"]))
         .config("spark.sql.session.timeZone", cfg["timezone"])
         .config("spark.sql.warehouse.dir", str(warehouse))
+        # Caché y shuffles en disco: en WSL /tmp es tmpfs (memoria) y no alcanza para el SIAF
+        .config("spark.local.dir", str(raiz_proyecto() / ".spark_tmp"))
     )
     for clave, valor in (cfg.get("config_extra") or {}).items():
         builder = builder.config(clave, str(valor))

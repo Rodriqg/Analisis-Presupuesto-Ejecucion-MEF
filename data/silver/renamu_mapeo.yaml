@@ -1,0 +1,118 @@
+# Mapeo del RENAMU a Silver 
+tabla: renamu_finanzas
+fuente: F3
+
+# Identificación: todas las ediciones traen ccdd, ccpp y ccdi. El tipo cambia de nombre de columna según la
+# edición; se toma la primera que exista. Los nombres (departamento, provincia, distrito) no se cargan: en Gold
+# salen del SIAF por ubigeo.
+identificacion:
+  ubigeo: [CCDD, CCPP, CCDI]          # lpad 2 + lpad 2 + lpad 2
+  tipo_municipalidad: [TIPOMUNI, CATMUNI]
+  tipo_valores: {"1": PROVINCIAL, "2": DISTRITAL, "3": CENTRO POBLADO}   # 3 = catálogo del INEI; fuera de alcance (va en F02)
+
+# Variables universales (formato 2020–2026). Montos en soles.
+variables:
+  ingresos:
+    informo: "Municipalidad informante del cuadro de ingresos (1 = informó, 0 = no informó)"
+    total: "Total de ingresos ejecutados (I+II+III+IV)"
+    corrientes: "I. Ingresos corrientes"
+    capital: "II. Ingresos de capital"
+    transferencias: "III. Transferencias"
+    financiamiento: "IV. Financiamiento"
+  gastos:
+    informo: "Municipalidad informante del cuadro de gastos (1 = informó, 0 = no informó)"
+    total: "Total de gastos ejecutados (I+II+III)"
+    corrientes: "I. Gastos corrientes"
+    capital: "II. Gastos de capital"
+    servicio_deuda: "III. Servicio de la deuda"
+
+ediciones:
+  2009:
+    anio_dato: 2009
+    confianza: media
+    nota: "El PDF llama al cuadro de ingresos P103; el CSV usa P102 (mismos sufijos). No hay categoría III: las transferencias van dentro de los ingresos corrientes. La línea IV (P102_71) solo suma el endeudamiento; el saldo de balance (P102_74) va aparte, así que financiamiento = P102_71 + P102_74 (desde 2010 el saldo ya está dentro de la IV)."
+    ingresos: {archivo: C094.csv, informo: VFI_P102, total: P102_01, corrientes: P102_02, capital: P102_60, transferencias: null, financiamiento: [P102_71, P102_74]}
+    gastos:   {archivo: C095.csv, informo: VFI_P104, total: P104_01, corrientes: P104_02, capital: P104_08, servicio_deuda: P104_13}
+  2010:
+    anio_dato: 2010
+    confianza: alta
+    ingresos: {archivo: C094.csv, informo: VFI_P103, total: P103_01, corrientes: P103_02, capital: P103_33, transferencias: P103_36, financiamiento: P103_43}
+    gastos:   {archivo: C095.csv, informo: VFI_P104, total: P104_01, corrientes: P104_02, capital: P104_08, servicio_deuda: P104_13}
+  2011:
+    anio_dato: 2011
+    confianza: alta
+    ingresos: {archivo: C094.csv, informo: VFI_P103, total: P103_01, corrientes: P103_02, capital: P103_33, transferencias: P103_36, financiamiento: P103_43}
+    gastos:   {archivo: C095.csv, informo: VFI_P104, total: P104_01, corrientes: P104_02, capital: P104_08, servicio_deuda: P104_13}
+  2012:
+    anio_dato: 2012
+    confianza: media
+    nota: "El PDF llama al cuadro de gastos P114; el CSV usa P105."
+    ingresos: {archivo: C104.csv, informo: VFI_P113, total: P113_01, corrientes: P113_02, capital: P113_33, transferencias: P113_36, financiamiento: P113_43}
+    gastos:   {archivo: C105.csv, informo: VFI_P105, total: P105_01, corrientes: P105_02, capital: P105_08, servicio_deuda: P105_13}
+  2013:
+    anio_dato: 2013
+    confianza: media
+    nota: "El PDF de 2013 no trae el cuadro; se usa el diccionario de 2012 (mismo archivo y mismos códigos)."
+    ingresos: {archivo: C104.csv, informo: VFI_P113, total: P113_01, corrientes: P113_02, capital: P113_33, transferencias: P113_36, financiamiento: P113_43}
+    gastos:   {archivo: C105.csv, informo: VFI_P114, total: P114_01, corrientes: P114_02, capital: P114_08, servicio_deuda: P114_13}
+  2014:
+    existe: false
+    nota: "La edición no trae el cuadro de finanzas."
+  2015:
+    anio_dato: 2015
+    confianza: alta
+    ingresos: {archivo: C111.csv, informo: VFI_P118, total: P118, corrientes: P118_1, capital: P118_2, transferencias: P118_3, financiamiento: P118_4}
+    gastos:   {archivo: C112.csv, informo: VFI_P119, total: P119, corrientes: P119_1, capital: P119_2, servicio_deuda: P119_3}
+  2016:
+    existe: false
+    nota: "La edición no trae el cuadro de finanzas."
+  2017:
+    anio_dato: 2016
+    confianza: alta
+    ingresos: {archivo: C115.csv, informo: VFI_C115, total: C115, corrientes: C115_1, capital: C115_2, transferencias: C115_3, financiamiento: C115_4}
+    gastos:   {archivo: C116.csv, informo: VFI_C116, total: C116, corrientes: C116_1, capital: C116_2, servicio_deuda: C116_3}
+  2018:
+    anio_dato: 2017
+    confianza: alta
+    ingresos: {archivo: C06.csv, informo: VFI_C119, total: C119, corrientes: C119_1, capital: C119_2, transferencias: C119_3, financiamiento: C119_4}
+    gastos:   {archivo: C06.csv, informo: VFI_C120, total: C120, corrientes: C120_1, capital: C120_2, servicio_deuda: C120_3}
+  2019:
+    anio_dato: 2018
+    confianza: alta
+    ingresos: {archivo: C04.csv, informo: VFI_C100, total: C100, corrientes: C100_1, capital: C100_2, transferencias: C100_3, financiamiento: C100_4}
+    gastos:   {archivo: C04.csv, informo: VFI_C101, total: C101, corrientes: C101_1, capital: C101_2, servicio_deuda: C101_3}
+  2020:
+    anio_dato: 2019
+    confianza: alta
+    ingresos: {archivo: C04.csv, informo: VFI_C96, total: C96, corrientes: C96_1, capital: C96_2, transferencias: C96_3, financiamiento: C96_4}
+    gastos:   {archivo: C04.csv, informo: VFI_C97, total: C97, corrientes: C97_1, capital: C97_2, servicio_deuda: C97_3}
+  2021:
+    anio_dato: 2020
+    confianza: alta
+    ingresos: {archivo: Base_Renamu_2021_vf.csv, informo: VFI_C96, total: C96, corrientes: C96_1, capital: C96_2, transferencias: C96_3, financiamiento: C96_4}
+    gastos:   {archivo: Base_Renamu_2021_vf.csv, informo: VFI_C97, total: C97, corrientes: C97_1, capital: C97_2, servicio_deuda: C97_3}
+  2022:
+    anio_dato: 2021
+    confianza: alta
+    ingresos: {archivo: Base_RENAMU_2022_f.csv, informo: VFI_C96, total: C96, corrientes: C96_1, capital: C96_2, transferencias: C96_3, financiamiento: C96_4}
+    gastos:   {archivo: Base_RENAMU_2022_f.csv, informo: VFI_C97, total: C97, corrientes: C97_1, capital: C97_2, servicio_deuda: C97_3}
+  2023:
+    anio_dato: 2022
+    confianza: alta
+    ingresos: {archivo: Base-Datos_2023_f.csv, informo: VFI_C96, total: C96, corrientes: C96_1, capital: C96_2, transferencias: C96_3, financiamiento: C96_4}
+    gastos:   {archivo: Base-Datos_2023_f.csv, informo: VFI_C97, total: C97, corrientes: C97_1, capital: C97_2, servicio_deuda: C97_3}
+  2024:
+    anio_dato: 2023
+    confianza: alta
+    ingresos: {archivo: Base-Datos_2024_f.csv, informo: VFI_C96, total: C96, corrientes: C96_1, capital: C96_2, transferencias: C96_3, financiamiento: C96_4}
+    gastos:   {archivo: Base-Datos_2024_f.csv, informo: VFI_C97, total: C97, corrientes: C97_1, capital: C97_2, servicio_deuda: C97_3}
+  2025:
+    anio_dato: 2024
+    confianza: alta
+    ingresos: {archivo: Base-Datos_2025_f_.csv, informo: VFI_C96, total: C96, corrientes: C96_1, capital: C96_2, transferencias: C96_3, financiamiento: C96_4}
+    gastos:   {archivo: Base-Datos_2025_f_.csv, informo: VFI_C97, total: C97, corrientes: C97_1, capital: C97_2, servicio_deuda: C97_3}
+  2026:
+    anio_dato: 2025
+    confianza: alta
+    ingresos: {archivo: Base_de_Datos_F01_RENAMU2026.csv, informo: VFI_C96, total: C96, corrientes: C96_1, capital: C96_2, transferencias: C96_3, financiamiento: C96_4}
+    gastos:   {archivo: Base_de_Datos_F01_RENAMU2026.csv, informo: VFI_C97, total: C97, corrientes: C97_1, capital: C97_2, servicio_deuda: C97_3}
