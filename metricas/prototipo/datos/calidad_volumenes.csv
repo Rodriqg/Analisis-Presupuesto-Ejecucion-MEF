@@ -1,0 +1,6 @@
+capa,fuente,tabla,archivos,filas,mb,fecha_datos,filas_carga_cruda,filas_fuera_de_alcance,filas_cuarentena
+bronze,F1,siaf_ingreso,18,15204055,7336.2,2026-11-22,,,
+silver,F1,siaf_ingreso,432,12746403,200.8,2026-11-22,15204055.0,2457615.0,0.0
+bronze,F2,sismepre_predial,7,493843,59.1,2026-11-22,,,
+bronze,F3,renamu,1109,2240471,354.5,2026-11-20,,,
+silver,F3,renamu_finanzas,43,29841,2.3,2026-11-20,42747.0,0.0,0.0

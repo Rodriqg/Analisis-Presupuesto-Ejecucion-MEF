@@ -1,0 +1,1140 @@
+<meta name="dash-one-writer">
+<style>
+  .mp { display: grid; gap: var(--cds-gap-lg); font-family: var(--font-anthropic-sans); color: var(--color-fg); }
+  .mp-head { display: grid; gap: var(--cds-gap-sm); max-width: 72ch; }
+  .mp-head h1 { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); margin: 0; text-wrap: balance; }
+  .mp-head p { margin: 0; color: var(--color-fg-muted); }
+  .mp-tabs { display: flex; flex-wrap: wrap; gap: var(--cds-gap-xs); border-bottom: 1px solid var(--color-border-line); }
+  .mp-tab { font: inherit; font-size: var(--cds-font-size-body); background: none; border: 0; border-bottom: 2px solid transparent; color: var(--color-fg-muted); padding: var(--cds-pad-sm) var(--cds-pad-md); cursor: pointer; }
+  .mp-tab[aria-selected="true"] { color: var(--color-fg); border-bottom-color: var(--color-fg); font-weight: var(--cds-font-weight-medium); }
+  .mp-tab:focus-visible { outline: 2px solid var(--color-fg); outline-offset: 2px; }
+  .mp-sec { display: grid; gap: var(--cds-gap-lg); }
+  .mp-q { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-heading); margin: 0; text-wrap: balance; }
+  .mp-take { margin: 0; max-width: 72ch; }
+  .mp-take b { font-variant-numeric: tabular-nums; }
+  .mp-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: var(--cds-gap-md); }
+  .mp-kpi { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-md) var(--cds-pad-lg); display: grid; gap: var(--cds-gap-xs); }
+  .mp-kpi span { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
+  .mp-kpi b { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); font-variant-numeric: tabular-nums; }
+  .mp-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: var(--cds-gap-lg); }
+  .mp-card { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-lg); display: grid; gap: var(--cds-gap-sm); min-width: 0; align-content: start; }
+  .mp-card h3 { margin: 0; font-size: var(--cds-font-size-body); font-weight: var(--cds-font-weight-medium); }
+  .mp-card .mp-sub { margin: 0; color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
+  .v-chart { position: relative; min-height: 220px; }
+  .v-chart svg { display: block; overflow: visible; }
+  .v-chart text { fill: var(--cds-text-secondary); font-size: 11px; font-family: var(--font-anthropic-sans); }
+  .v-chart .v-grid line { stroke: var(--cds-chart-grid); }
+  .v-chart .v-axis path, .v-chart .v-axis line { stroke: var(--cds-chart-axis); }
+  .v-chart .v-val { fill: var(--color-fg); font-variant-numeric: tabular-nums; }
+  .v-legend { display: flex; flex-wrap: wrap; gap: var(--cds-gap-sm) var(--cds-gap-md); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); margin-bottom: var(--cds-gap-xs); }
+  .v-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+  .v-tip { position: absolute; z-index: 5; pointer-events: none; background: var(--cds-surface-popover); border: 1px solid var(--cds-border); box-shadow: var(--cds-shadow-popover); border-radius: var(--cds-radius); padding: var(--cds-pad-xs) var(--cds-pad-sm); font-size: var(--cds-font-size-caption); color: var(--cds-text-secondary); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .v-tip .v-tip-h { color: var(--color-fg); font-weight: var(--cds-font-weight-medium); }
+  .v-empty { color: var(--color-fg-muted); margin: 0; }
+  .mp-note { margin: 0; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); max-width: 80ch; }
+  .mp-controles { display: flex; flex-wrap: wrap; gap: var(--cds-gap-md); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .mp-controles label { display: grid; gap: var(--cds-gap-xs); }
+  .mp-mapa { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: var(--cds-gap-lg); align-items: start; }
+  .v-mapa { min-height: 420px; }
+  .v-mapa path { stroke: var(--color-panel); stroke-width: 1; }
+  .v-escala { display: flex; align-items: center; gap: var(--cds-gap-sm); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); font-variant-numeric: tabular-nums; }
+  .v-escala i { display: block; width: 140px; height: 8px; border-radius: 4px; }
+  .mp-pend { border: 1px dashed var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-md) var(--cds-pad-lg); display: grid; gap: var(--cds-gap-xs); }
+  .mp-pend h3 { margin: 0; font-size: var(--cds-font-size-body); font-weight: var(--cds-font-weight-medium); }
+  .mp-pend p { margin: 0; color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
+  .mp-tablewrap { overflow-x: auto; }
+  .mp-table { border-collapse: collapse; width: 100%; font-size: var(--cds-font-size-caption); font-variant-numeric: tabular-nums; }
+  .mp-table th, .mp-table td { text-align: left; padding: var(--cds-pad-xs) var(--cds-pad-sm); border-bottom: 1px solid var(--color-border-line); white-space: nowrap; }
+  .mp-table th { color: var(--color-fg-muted); font-weight: var(--cds-font-weight-medium); }
+  .mp-table td.n, .mp-table th.n { text-align: right; }
+  .mp-pill { display: inline-block; padding: 0 8px; border-radius: 999px; border: 1px solid currentColor; }
+  .mp-pill.ok { color: var(--color-ok); } .mp-pill.alerta { color: var(--color-warn); } .mp-pill.mal { color: var(--color-bad); }
+  @media print { .mp-tabs { display: none; } .mp-sec { break-before: page; } }
+</style>
+
+<div class="mp">
+  <header class="mp-head" id="encabezado">
+    <h1>Ingresos municipales del Perú</h1>
+    <p>¿Las municipalidades tienen la capacidad para generar y gestionar sus propios ingresos, y cómo se refleja eso en los servicios que prestan? Prototipo con datos reales del SIAF, el RENAMU y el SISMEPRE, 2020–2025 (2026 parcial).</p>
+  </header>
+
+  <nav class="mp-tabs" role="tablist" aria-label="Dashboards">
+    <button class="mp-tab" role="tab" aria-selected="true" aria-controls="panorama" data-tab="panorama">1 · Panorama financiero</button>
+    <button class="mp-tab" role="tab" aria-selected="false" aria-controls="autonomia" data-tab="autonomia">2 · Autonomía</button>
+    <button class="mp-tab" role="tab" aria-selected="false" aria-controls="capacidad" data-tab="capacidad">3 · Capacidad institucional</button>
+    <button class="mp-tab" role="tab" aria-selected="false" aria-controls="predial" data-tab="predial">4 · Impuesto predial</button>
+    <button class="mp-tab" role="tab" aria-selected="false" aria-controls="servicios" data-tab="servicios">5 · Servicios</button>
+    <button class="mp-tab" role="tab" aria-selected="false" aria-controls="ficha" data-tab="ficha">6 · Ficha por municipalidad</button>
+    <button class="mp-tab" role="tab" aria-selected="false" aria-controls="calidad" data-tab="calidad">Anexo · Calidad de datos</button>
+  </nav>
+
+  <!-- 1 · PANORAMA -->
+  <section class="mp-sec" id="panorama" role="tabpanel">
+    <h2 class="mp-q">¿Cuánto dinero tienen, de dónde viene y cuánto ejecutan de lo presupuestado?</h2>
+    <p class="mp-take">En 2025 las municipalidades recaudaron <b data-draw="t1-rec" data-source="kpi" data-field="recaudado" data-row="0">—</b> millones de soles, el <b data-draw="t1-eje" data-source="kpi" data-field="ejecucion_pct" data-row="0">—</b> % de su PIM, con una variación de <b data-draw="t1-var" data-source="kpi" data-field="var_recaudado_pct" data-row="0">—</b> % frente a 2024.</p>
+    <div class="mp-kpis">
+      <div class="mp-kpi" id="k-recaudado"><span>Recaudado 2025 (S/ millones)</span><b data-draw="k1-rec" data-source="kpi" data-field="recaudado" data-row="0">—</b></div>
+      <div class="mp-kpi" id="k-pim"><span>PIM 2025 (S/ millones)</span><b data-draw="k1-pim" data-source="kpi" data-field="pim" data-row="0">—</b></div>
+      <div class="mp-kpi" id="k-ejecucion"><span>% de ejecución 2025 (recaudado ÷ PIM)</span><b data-draw="k1-eje" data-source="kpi" data-field="ejecucion_pct" data-row="0">—</b></div>
+      <div class="mp-kpi" id="k-variacion"><span>Variación del recaudado vs. 2024 (%)</span><b data-draw="k1-var" data-source="kpi" data-field="var_recaudado_pct" data-row="0">—</b></div>
+    </div>
+    <div class="mp-grid">
+      <div class="mp-card" id="c-evolucion">
+        <h3>PIA, PIM y recaudado por año</h3>
+        <p class="mp-sub">Millones de soles, 2009–2026. 2026 llega hasta noviembre. En 2009–2011 el PIA se registraba repartido en el año; desde 2012, en enero (el total anual es comparable).</p>
+        <div class="v-chart" data-draw="ch-evolucion" data-source="siaf_anual"></div>
+      </div>
+      <div class="mp-card" id="c-categoria">
+        <h3>Composición del recaudado por categoría</h3>
+        <p class="mp-sub">% del recaudado de cada año, 2009–2025. Categorías del RENAMU a partir de la genérica del SIAF.</p>
+        <div class="v-chart" data-draw="ch-categoria" data-source="categoria_pct"></div>
+      </div>
+      <div class="mp-card" id="c-estacionalidad">
+        <h3>Estacionalidad: recaudado promedio por mes</h3>
+        <p class="mp-sub">Millones de soles, promedio 2009–2025.</p>
+        <div class="v-chart" data-draw="ch-estacionalidad" data-source="estacionalidad"></div>
+      </div>
+    </div>
+    <div class="mp-card" id="c-departamento">
+      <h3>Por departamento</h3>
+      <p class="mp-sub">Municipalidades agrupadas por los 2 primeros dígitos de su ubigeo. Elige la métrica y el año.</p>
+      <div class="mp-controles">
+        <label>Métrica <select class="dash-select" id="sel-metrica" aria-label="Métrica del mapa">
+          <option value="ejecucion_pct">% de ejecución (recaudado ÷ PIM)</option>
+          <option value="autonomia_pct">% de autonomía fiscal (propios ÷ recaudado)</option>
+          <option value="canon_pct">% que viene del canon y regalías</option>
+          <option value="recaudado_mill">Recaudado (S/ millones)</option>
+          <option value="predial_mill">Predial (S/ millones)</option>
+        </select></label>
+        <label>Año <select class="dash-select" id="sel-anio" aria-label="Año del mapa">
+          <option>2026</option><option selected>2025</option><option>2024</option><option>2023</option><option>2022</option><option>2021</option><option>2020</option><option>2019</option><option>2018</option><option>2017</option><option>2016</option><option>2015</option><option>2014</option><option>2013</option><option>2012</option><option>2011</option><option>2010</option><option>2009</option>
+        </select></label>
+      </div>
+      <div class="mp-mapa">
+        <div class="v-chart v-mapa" data-draw="ch-mapa" data-source="departamento_metricas geo_departamentos"></div>
+        <div class="v-chart" data-draw="ch-depto-rank" data-source="departamento_metricas"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 · AUTONOMÍA -->
+  <section class="mp-sec" id="autonomia" role="tabpanel" hidden>
+    <h2 class="mp-q">¿Quién vive de sus propios ingresos y quién de transferencias?</h2>
+    <p class="mp-take">En 2025 los ingresos propios (impuestos municipales y recursos directamente recaudados) fueron el <b data-draw="t2-aut" data-source="kpi" data-field="autonomia_pct" data-row="0">—</b> % del recaudado; el canon y las regalías, el <b data-draw="t2-can" data-source="kpi" data-field="canon_pct" data-row="0">—</b> %.</p>
+    <div class="mp-kpis">
+      <div class="mp-kpi" id="k-propios"><span>Ingresos propios 2025 (S/ millones)</span><b data-draw="k2-pro" data-source="kpi" data-field="propios" data-row="0">—</b></div>
+      <div class="mp-kpi" id="k-autonomia"><span>% de autonomía fiscal 2025</span><b data-draw="k2-aut" data-source="kpi" data-field="autonomia_pct" data-row="0">—</b></div>
+      <div class="mp-kpi" id="k-canon"><span>% que viene del canon y regalías 2025</span><b data-draw="k2-can" data-source="kpi" data-field="canon_pct" data-row="0">—</b></div>
+      <div class="mp-kpi" id="k-cobertura"><span>Cobertura del gasto 2025 (ingresos ÷ gastos, RENAMU)</span><b data-draw="k2-cob" data-source="cobertura" data-field="cobertura_pct" data-where="anio=2025">—</b></div>
+    </div>
+    <div class="mp-grid">
+      <div class="mp-card" id="c-aut-evolucion">
+        <h3>¿Creció la autonomía? 2009–2025</h3>
+        <p class="mp-sub">% del recaudado que son ingresos propios, y % que viene del canon y regalías.</p>
+        <div class="v-chart" data-draw="ch-aut-evolucion" data-source="autonomia_anual"></div>
+      </div>
+      <div class="mp-card" id="c-aut-depto">
+        <h3>Departamentos más y menos independientes</h3>
+        <p class="mp-sub">% de autonomía fiscal de las municipalidades de cada departamento, 2009 frente a 2025.</p>
+        <div class="v-chart" data-draw="ch-aut-depto" data-source="autonomia_depto"></div>
+      </div>
+      <div class="mp-card" id="c-mezcla">
+        <h3>De dónde viene el dinero, por año</h3>
+        <p class="mp-sub">% del recaudado por fuente (rubro del SIAF), 2009–2025.</p>
+        <div class="v-chart" data-draw="ch-mezcla" data-source="mezcla"></div>
+      </div>
+      <div class="mp-card" id="c-aut-clasif">
+        <h3>Autonomía fiscal por clasificación A–G, 2024</h3>
+        <p class="mp-sub">Promedio simple de (propios ÷ recaudado) de cada municipalidad. A–B provinciales, C Lima Metropolitana, D otras ciudades principales, E–G distritos de menos a más rurales.</p>
+        <div class="v-chart" data-draw="ch-aut-clasif" data-source="autonomia_clasif"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 · CAPACIDAD -->
+  <section class="mp-sec" id="capacidad" role="tabpanel" hidden>
+    <h2 class="mp-q">¿Con qué personal y equipamiento cuentan, y las que tienen más capacidad generan más?</h2>
+    <p class="mp-take">En 2024 las municipalidades tenían <b data-draw="t3-per" data-source="capacidad_kpi" data-field="personal_total" data-row="0">—</b> trabajadores; el <b data-draw="t3-ren" data-source="capacidad_kpi" data-field="pct_con_rentas" data-row="0">—</b> % tenía personal exclusivo de rentas y la municipalidad típica generó <b data-draw="t3-pxt" data-source="capacidad_kpi" data-field="mediana_propios_por_trabajador" data-row="0">—</b> soles de ingresos propios por trabajador.</p>
+    <div class="mp-kpis">
+      <div class="mp-kpi" id="k-personal"><span>Personal municipal, 2024</span><b data-draw="k3-per" data-source="capacidad_kpi" data-field="personal_total" data-row="0">—</b></div>
+      <div class="mp-kpi" id="k-rentas"><span>% con personal exclusivo de rentas</span><b data-draw="k3-ren" data-source="capacidad_kpi" data-field="pct_con_rentas" data-row="0">—</b></div>
+      <div class="mp-kpi" id="k-linea"><span>% que acepta pago en línea</span><b data-draw="k3-lin" data-source="capacidad_kpi" data-field="pct_pago_en_linea" data-row="0">—</b></div>
+      <div class="mp-kpi" id="k-pxt"><span>Ingresos propios por trabajador (mediana, S/)</span><b data-draw="k3-pxt" data-source="capacidad_kpi" data-field="mediana_propios_por_trabajador" data-row="0">—</b></div>
+    </div>
+    <div class="mp-grid">
+      <div class="mp-card" id="c-dispersion">
+        <h3>Personal vs. ingresos propios, por municipalidad (2024)</h3>
+        <p class="mp-sub">Escalas logarítmicas. Cada punto es una municipalidad.</p>
+        <div class="v-chart" data-draw="ch-dispersion" data-source="municipios_2024"></div>
+      </div>
+      <div class="mp-card" id="c-productividad">
+        <h3>Ingresos propios por trabajador, por clasificación A–G</h3>
+        <p class="mp-sub">Mediana en soles, 2024.</p>
+        <div class="v-chart" data-draw="ch-productividad" data-source="productividad_clasif"></div>
+      </div>
+      <div class="mp-card" id="c-equipamiento">
+        <h3>Computadoras con internet por cada 10 trabajadores</h3>
+        <p class="mp-sub">Mediana por clasificación A–G, 2024.</p>
+        <div class="v-chart" data-draw="ch-equipamiento" data-source="equipamiento_clasif"></div>
+      </div>
+      <div class="mp-card" id="c-gestion">
+        <h3>Herramientas de gestión</h3>
+        <p class="mp-sub">% de municipalidades de cada clasificación con personal exclusivo de rentas, pago en línea y oficina ambiental, 2024.</p>
+        <div class="v-chart" data-draw="ch-gestion" data-source="gestion_clasif"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 · PREDIAL -->
+  <section class="mp-sec" id="predial" role="tabpanel" hidden>
+    <h2 class="mp-q">¿Cuánto recaudan por predial y ayuda tener personal de rentas?</h2>
+    <p class="mp-take">En 2025 el impuesto predial sumó <b data-draw="t4-pre" data-source="kpi" data-field="predial" data-row="0">—</b> millones de soles, una variación de <b data-draw="t4-var" data-source="kpi" data-field="var_predial_pct" data-row="0">—</b> % frente a 2024.</p>
+    <div class="mp-kpis">
+      <div class="mp-kpi" id="k-predial"><span>Predial recaudado 2025 (S/ millones)</span><b data-draw="k4-pre" data-source="kpi" data-field="predial" data-row="0">—</b></div>
+      <div class="mp-kpi" id="k-predial-var"><span>Variación vs. 2024 (%)</span><b data-draw="k4-var" data-source="kpi" data-field="var_predial_pct" data-row="0">—</b></div>
+    </div>
+    <div class="mp-grid">
+      <div class="mp-card" id="c-predial-anual">
+        <h3>Predial recaudado por año</h3>
+        <p class="mp-sub">Millones de soles (clasificadores 1.2.1.1.1 y 1.2.1.1.2), 2009–2026. 2026 llega hasta noviembre.</p>
+        <div class="v-chart" data-draw="ch-predial-anual" data-source="siaf_anual"></div>
+      </div>
+      <div class="mp-card" id="c-predial-mes">
+        <h3>Cuándo se paga: predial promedio por mes</h3>
+        <p class="mp-sub">Millones de soles, promedio 2009–2025.</p>
+        <div class="v-chart" data-draw="ch-predial-mes" data-source="estacionalidad"></div>
+      </div>
+      <div class="mp-card" id="c-predial-rentas">
+        <h3>Predial por municipalidad: con y sin personal de rentas</h3>
+        <p class="mp-sub">Mediana en miles de soles, 2024, por clasificación A–G.</p>
+        <div class="v-chart" data-draw="ch-predial-rentas" data-source="predial_rentas"></div>
+      </div>
+      <div class="mp-card" id="c-peso-predial">
+        <h3>Cuánto pesa el predial en los ingresos propios</h3>
+        <p class="mp-sub">Mediana de (predial ÷ ingresos propios) por municipalidad, por clasificación A–G, 2024.</p>
+        <div class="v-chart" data-draw="ch-peso-predial" data-source="peso_predial"></div>
+      </div>
+    </div>
+    <div class="mp-pend" id="p-esat">
+      <h3>Pendiente: tasa de cobranza y morosidad (SISMEPRE)</h3>
+      <p>Recaudación ÷ emisión y saldo por cobrar ÷ emisión, por clasificación A–G. Requiere el Silver del SISMEPRE (04), que tome cada medida de su formulario del ESAT.</p>
+    </div>
+  </section>
+
+  <!-- 5 · SERVICIOS -->
+  <section class="mp-sec" id="servicios" role="tabpanel" hidden>
+    <h2 class="mp-q">¿Qué servicios prestan y cómo se relacionan con sus recursos?</h2>
+    <p class="mp-take">En 2024 el <b data-draw="t5-ser" data-source="servicios_kpi" data-field="pct_serenazgo" data-row="0">—</b> % de las municipalidades tenía serenazgo y solo el <b data-draw="t5-rel" data-source="servicios_kpi" data-field="pct_relleno" data-row="0">—</b> % llevaba sus residuos a un relleno sanitario.</p>
+    <div class="mp-kpis">
+      <div class="mp-kpi" id="k-serenazgo"><span>% con serenazgo</span><b data-draw="k5-ser" data-source="servicios_kpi" data-field="pct_serenazgo" data-row="0">—</b></div>
+      <div class="mp-kpi" id="k-serenos"><span>Efectivos de serenazgo</span><b data-draw="k5-sns" data-source="servicios_kpi" data-field="serenos" data-row="0">—</b></div>
+      <div class="mp-kpi" id="k-relleno"><span>% con relleno sanitario</span><b data-draw="k5-rel" data-source="servicios_kpi" data-field="pct_relleno" data-row="0">—</b></div>
+      <div class="mp-kpi" id="k-vaso"><span>Beneficiarios del Vaso de Leche</span><b data-draw="k5-vas" data-source="servicios_kpi" data-field="vaso_leche" data-row="0">—</b></div>
+    </div>
+    <div class="mp-grid">
+      <div class="mp-card" id="c-quintil">
+        <h3>Servicios según ingresos propios</h3>
+        <p class="mp-sub">% de municipalidades de cada quintil de ingresos propios (Q1 = el 20 % que menos genera), 2024.</p>
+        <div class="v-chart" data-draw="ch-quintil" data-source="servicios_quintil"></div>
+      </div>
+      <div class="mp-card" id="c-residuos">
+        <h3>A dónde van los residuos</h3>
+        <p class="mp-sub">% de municipalidades que llevan residuos a relleno sanitario, y % promedio de lo recogido que termina en botadero, por clasificación A–G, 2024.</p>
+        <div class="v-chart" data-draw="ch-residuos" data-source="residuos_clasif"></div>
+      </div>
+      <div class="mp-card" id="c-serenazgo">
+        <h3>Tamaño del serenazgo</h3>
+        <p class="mp-sub">Mediana de efectivos por municipalidad que tiene serenazgo, por clasificación A–G, 2024. El detalle muestra las unidades operativas por cada 10 serenos.</p>
+        <div class="v-chart" data-draw="ch-serenazgo" data-source="serenazgo_clasif"></div>
+      </div>
+      <div class="mp-card" id="c-vaso">
+        <h3>Beneficiarios del Vaso de Leche por departamento</h3>
+        <p class="mp-sub">Miles de beneficiarios, 2024.</p>
+        <div class="v-chart" data-draw="ch-vaso" data-source="vaso_depto"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 · FICHA -->
+  <section class="mp-sec" id="ficha" role="tabpanel" hidden>
+    <h2 class="mp-q">¿Cómo está esta municipalidad frente a las de su mismo tipo?</h2>
+    <div class="mp-controles">
+      <label>Departamento <select class="dash-select" id="sel-depto" data-draw="sel-depto" data-source="municipios_2024" aria-label="Departamento"></select></label>
+      <label>Municipalidad <select class="dash-select" id="sel-muni" data-draw="sel-muni" data-source="municipios_2024" aria-label="Municipalidad"></select></label>
+    </div>
+    <p class="mp-take"><b data-draw="f-nombre" data-source="ficha" data-field="nombre" data-row="0">—</b> (<span data-draw="f-tipo" data-source="ficha" data-field="tipo" data-row="0">—</span>, clasificación <span data-draw="f-clasif" data-source="ficha" data-field="grupo" data-row="0">—</span>). Se compara con las <b data-draw="f-ngrupo" data-source="ficha" data-field="n_grupo" data-row="0">—</b> municipalidades de su grupo. Datos de 2024.</p>
+    <div class="mp-kpis">
+      <div class="mp-kpi" id="kf-recaudado"><span>Recaudado (S/ miles)</span><b data-draw="kf-rec" data-source="ficha" data-field="recaudado_miles" data-row="0">—</b><span>Grupo: <span data-draw="kf-rec-g" data-source="ficha" data-field="g_recaudado_miles" data-row="0">—</span></span></div>
+      <div class="mp-kpi" id="kf-ejecucion"><span>% de ejecución</span><b data-draw="kf-eje" data-source="ficha" data-field="ejecucion_pct" data-row="0">—</b><span>Grupo: <span data-draw="kf-eje-g" data-source="ficha" data-field="g_ejecucion_pct" data-row="0">—</span></span></div>
+      <div class="mp-kpi" id="kf-autonomia"><span>% de autonomía fiscal</span><b data-draw="kf-aut" data-source="ficha" data-field="autonomia_pct" data-row="0">—</b><span>Grupo: <span data-draw="kf-aut-g" data-source="ficha" data-field="g_autonomia_pct" data-row="0">—</span></span></div>
+      <div class="mp-kpi" id="kf-personal"><span>Personal</span><b data-draw="kf-per" data-source="ficha" data-field="personal" data-row="0">—</b><span>Grupo: <span data-draw="kf-per-g" data-source="ficha" data-field="g_personal" data-row="0">—</span></span></div>
+      <div class="mp-kpi" id="kf-pxt"><span>Ingresos propios por trabajador (S/)</span><b data-draw="kf-pxt" data-source="ficha" data-field="propios_por_trabajador" data-row="0">—</b><span>Grupo: <span data-draw="kf-pxt-g" data-source="ficha" data-field="g_propios_por_trabajador" data-row="0">—</span></span></div>
+    </div>
+    <p class="mp-note">"Grupo" es la mediana de las municipalidades de la misma clasificación A–G (o sin clasificación, si no tiene meta del predial).</p>
+    <div class="mp-grid">
+      <div class="mp-card" id="cf-serie">
+        <h3>Evolución 2009–2025</h3>
+        <p class="mp-sub">PIM, recaudado e ingresos propios de la municipalidad, en miles de soles.</p>
+        <div class="v-chart" data-draw="ch-f-serie" data-source="ficha_serie"></div>
+      </div>
+      <div class="mp-card" id="cf-fuentes">
+        <h3>De dónde viene su dinero</h3>
+        <p class="mp-sub">% del recaudado 2024 por fuente: la municipalidad frente al promedio de su grupo.</p>
+        <div class="v-chart" data-draw="ch-f-fuentes" data-source="ficha_fuentes"></div>
+      </div>
+      <div class="mp-card" id="cf-posicion">
+        <h3>Su posición en el grupo</h3>
+        <p class="mp-sub">Percentil en cada indicador: 50 = la mediana del grupo; 90 = mejor que el 90 % de su grupo.</p>
+        <div class="v-chart" data-draw="ch-f-posicion" data-source="ficha_percentiles"></div>
+      </div>
+      <div class="mp-card" id="cf-servicios">
+        <h3>Servicios y herramientas de gestión</h3>
+        <p class="mp-sub">Lo que tiene la municipalidad y qué parte de su grupo lo tiene.</p>
+        <div class="mp-tablewrap">
+          <table class="mp-table" data-source="ficha_servicios" data-row-key="indicador">
+            <thead><tr><th data-field="indicador">Indicador</th><th data-field="valor">Esta municipalidad</th><th class="n" data-field="grupo">Su grupo</th></tr></thead>
+            <tbody data-draw="tb-f-servicios"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ANEXO · CALIDAD -->
+  <section class="mp-sec" id="calidad" role="tabpanel" hidden>
+    <h2 class="mp-q">¿Qué tan confiables y al día están los datos?</h2>
+    <p class="mp-take">Del SIAF se cargaron <b data-draw="t6-bro" data-source="recorrido" data-field="filas" data-row="0">—</b> filas: <b data-draw="t6-fue" data-source="recorrido" data-field="filas" data-row="1">—</b> quedaron fuera de alcance (no son municipalidades) y <b data-draw="t6-sil" data-source="recorrido" data-field="filas" data-row="2">—</b> llegaron a Silver.</p>
+    <div class="mp-grid">
+      <div class="mp-card" id="c-recorrido">
+        <h3>Recorrido de las filas del SIAF</h3>
+        <p class="mp-sub">De Bronze a Silver: nada se pierde sin explicación.</p>
+        <div class="v-chart" data-draw="ch-recorrido" data-source="recorrido"></div>
+      </div>
+      <div class="mp-card" id="c-volumenes">
+        <h3>Volumen por capa y fuente</h3>
+        <p class="mp-sub">Última medición de cada tabla.</p>
+        <div class="mp-tablewrap">
+          <table class="mp-table" data-source="calidad_volumenes" data-row-key="capa,tabla">
+            <thead><tr><th data-field="capa">Capa</th><th data-field="fuente">Fuente</th><th data-field="tabla">Tabla</th><th class="n" data-field="filas">Filas</th><th class="n" data-field="mb">MB</th><th data-field="fecha_datos">Datos del</th></tr></thead>
+            <tbody data-draw="tb-volumenes"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="mp-card" id="c-reglas">
+        <h3>Reglas de calidad de la última carga</h3>
+        <p class="mp-sub">Filas que no cumplen cada regla y qué se hizo con ellas.</p>
+        <div class="mp-tablewrap">
+          <table class="mp-table" data-source="calidad_reglas" data-row-key="notebook,regla">
+            <thead><tr><th data-field="notebook">Notebook</th><th data-field="regla">Regla</th><th data-field="accion">Acción</th><th class="n" data-field="fallidas">Fallidas</th><th data-field="estado">Estado</th></tr></thead>
+            <tbody data-draw="tb-reglas"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <p class="mp-note" id="nota-fuentes">El anexo de calidad de datos no es uno de los 6 dashboards de decisión: documenta el control de calidad del pipeline. Fuentes: SIAF (MEF), tabla Silver del proyecto. RENAMU 2025 (INEI; describe 2024) y clasificación A–G del SISMEPRE (MEF), leídos de Bronze como dato preliminar, todavía sin pasar por Silver. Las fuentes no traen población, así que no hay métricas por habitante.</p>
+</div>
+
+<script>
+(function () {
+  // Pestañas: solo muestran u ocultan secciones.
+  const tabs = Array.from(document.querySelectorAll('.mp-tab'));
+  const secs = Array.from(document.querySelectorAll('.mp-sec'));
+  function abrir(id) {
+    if (!secs.some((s) => s.id === id)) id = 'panorama';
+    secs.forEach((s) => { s.hidden = s.id !== id; });
+    tabs.forEach((t) => t.setAttribute('aria-selected', String(t.dataset.tab === id)));
+    dash.setLink(id);
+  }
+  tabs.forEach((t) => t.addEventListener('click', () => abrir(t.dataset.tab)));
+  abrir((location.hash || '').slice(1));
+  document.querySelectorAll('#sel-metrica, #sel-anio').forEach((sel) => sel.addEventListener('change', () => { dash.draw('ch-mapa'); dash.draw('ch-depto-rank'); }));
+  let antes = null;
+  window.addEventListener('beforeprint', () => { if (!antes) { antes = secs.map((s) => s.hidden); secs.forEach((s) => { s.hidden = false; }); } });
+  window.addEventListener('afterprint', () => { if (antes) { secs.forEach((s, i) => { s.hidden = antes[i]; }); antes = null; } });
+})();
+</script>
+
+<script>
+// ---------- Cálculos (cada número que no está tal cual en un archivo) ----------
+const num = (v) => (v === null || v === undefined || v === '' ? null : +v);
+const r1 = (v) => Math.round(v * 10) / 10;
+const mediana = (a) => { const s = a.filter((v) => v !== null && isFinite(v)).sort((x, y) => x - y); if (!s.length) return null; const m = s.length >> 1; return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; };
+const CLASIF = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
+
+dash.calc('kpi', {
+  inputs: ['siaf_anual'], title: 'Indicadores 2025 del SIAF',
+  description: 'Recaudado, PIM, % de ejecución, autonomía, canon y predial de 2025, con su variación frente a 2024.',
+  fn: (anual) => {
+    const a = anual.find((r) => +r.anio === 2025), b = anual.find((r) => +r.anio === 2024);
+    if (!a || !b) return [];
+    const v = (r, k) => +r[k];
+    return [{
+      recaudado: Math.round(v(a, 'recaudado_mill')), pim: Math.round(v(a, 'pim_mill')),
+      ejecucion_pct: r1(100 * v(a, 'recaudado_mill') / v(a, 'pim_mill')),
+      var_recaudado_pct: r1(100 * (v(a, 'recaudado_mill') / v(b, 'recaudado_mill') - 1)),
+      propios: Math.round(v(a, 'propios_mill')),
+      autonomia_pct: r1(100 * v(a, 'propios_mill') / v(a, 'recaudado_mill')),
+      canon_pct: r1(100 * v(a, 'canon_mill') / v(a, 'recaudado_mill')),
+      predial: Math.round(v(a, 'predial_mill')),
+      var_predial_pct: r1(100 * (v(a, 'predial_mill') / v(b, 'predial_mill') - 1)),
+    }];
+  },
+});
+
+dash.calc('categoria_pct', {
+  inputs: ['siaf_categoria'], title: 'Recaudado por categoría I–IV (% del año)',
+  description: 'Participación de cada categoría en el recaudado de cada año.',
+  fn: (categorias) => {
+    const tot = d3.rollup(categorias, (g) => d3.sum(g, (r) => +r.recaudado_mill), (r) => +r.anio);
+    return categorias.map((r) => ({ anio: +r.anio, categoria: r.categoria, pct: r1(100 * (+r.recaudado_mill) / tot.get(+r.anio)) }));
+  },
+});
+
+dash.calc('estacionalidad', {
+  inputs: ['siaf_mensual'], title: 'Promedio mensual 2009–2025',
+  description: 'Recaudado y predial promedio de cada mes, años 2009 a 2025.',
+  fn: (mensual) => {
+    const rows = mensual.filter((r) => +r.anio <= 2025);
+    return d3.range(1, 13).map((m) => {
+      const g = rows.filter((r) => +r.mes === m);
+      return { mes: m, recaudado_mill: r1(d3.mean(g, (r) => +r.recaudado_mill)), predial_mill: r1(d3.mean(g, (r) => +r.predial_mill)) };
+    });
+  },
+});
+
+dash.calc('departamento_metricas', {
+  inputs: ['siaf_departamento'], title: 'Métricas por departamento y año',
+  description: 'Por departamento (2 primeros dígitos del ubigeo) y año: % de ejecución, % de autonomía, % del canon, recaudado y predial.',
+  fn: (departamentos) => departamentos.map((r) => ({
+    anio: +r.anio, cod: r.cod, departamento: r.departamento,
+    ejecucion_pct: r1(100 * (+r.recaudado_mill) / (+r.pim_mill)),
+    autonomia_pct: r1(100 * (+r.propios_mill || 0) / (+r.recaudado_mill)),
+    canon_pct: r1(100 * (+r.canon_mill || 0) / (+r.recaudado_mill)),
+    recaudado_mill: r1(+r.recaudado_mill), predial_mill: r1(+r.predial_mill || 0),
+  })),
+});
+
+dash.calc('mezcla', {
+  inputs: ['siaf_rubro'], title: 'Recaudado por fuente (% del año)',
+  description: 'Rubros agrupados: propios (08 + 09), FONCOMUN (07), canon y regalías (18), donaciones y transferencias (13), crédito (19).',
+  fn: (rubros) => {
+    const grupo = { '08': 'Propios', '09': 'Propios', '07': 'FONCOMUN', '18': 'Canon y regalías', '13': 'Donaciones y transferencias', '19': 'Crédito' };
+    const out = [];
+    d3.group(rubros, (r) => +r.anio).forEach((g, anio) => {
+      const tot = d3.sum(g, (r) => +r.recaudado_mill);
+      d3.rollup(g, (h) => d3.sum(h, (r) => +r.recaudado_mill), (r) => grupo[r.rubro] || 'Otros')
+        .forEach((v, fuente) => out.push({ anio, fuente, pct: r1(100 * v / tot) }));
+    });
+    return out;
+  },
+});
+
+dash.calc('autonomia_clasif', {
+  inputs: ['municipios_2024'], title: 'Autonomía por clasificación A–G, 2024',
+  description: 'Promedio simple de (ingresos propios ÷ recaudado) por municipalidad, según su clasificación del Programa de Incentivos.',
+  fn: (municipios) => {
+    const ok = municipios.filter((r) => num(r.recaudado) > 0);
+    return [...CLASIF, 'Sin clasificación'].map((c) => {
+      const g = ok.filter((r) => (r.clasificacion_pi || 'Sin clasificación') === c);
+      return { clasificacion: c, autonomia_pct: r1(100 * d3.mean(g, (r) => (num(r.propios) || 0) / num(r.recaudado))), municipalidades: g.length };
+    }).filter((r) => r.municipalidades > 0);
+  },
+});
+
+dash.calc('autonomia_anual', {
+  inputs: ['siaf_anual'], title: 'Autonomía y canon por año',
+  description: '% del recaudado que son ingresos propios (rubros 08 y 09) y % que viene del canon y regalías (rubro 18), 2009–2025.',
+  fn: (anual) => anual.filter((r) => +r.anio <= 2025).map((r) => ({
+    anio: +r.anio, autonomia_pct: r1(100 * (+r.propios_mill) / (+r.recaudado_mill)), canon_pct: r1(100 * (+r.canon_mill) / (+r.recaudado_mill)),
+  })),
+});
+
+dash.calc('autonomia_depto', {
+  inputs: ['siaf_departamento'], title: 'Autonomía por departamento, 2009 y 2025',
+  description: 'Ingresos propios ÷ recaudado de las municipalidades de cada departamento, en 2009 y en 2025.',
+  fn: (departamentos) => {
+    const aut = (r) => r1(100 * (+r.propios_mill || 0) / (+r.recaudado_mill));
+    const a = new Map(departamentos.filter((r) => +r.anio === 2009).map((r) => [r.cod, aut(r)]));
+    return departamentos.filter((r) => +r.anio === 2025).map((r) => ({ departamento: r.departamento.replace('PROVINCIA CONSTITUCIONAL DEL ', ''), aut_2009: a.get(r.cod) ?? null, aut_2025: aut(r) }))
+      .sort((x, y) => y.aut_2025 - x.aut_2025);
+  },
+});
+
+dash.calc('cobertura', {
+  inputs: ['renamu_anual'], title: 'Cobertura del gasto e inversión (RENAMU)',
+  description: 'Ingresos ÷ gastos declarados, y gasto de capital ÷ gasto total, por año del dato.',
+  fn: (renamu) => renamu.filter((r) => +r.anio >= 2020).map((r) => ({
+    anio: +r.anio, cobertura_pct: r1(100 * (+r.ing_total_mill) / (+r.gas_total_mill)), inversion_pct: r1(100 * (+r.gas_capital_mill) / (+r.gas_total_mill)),
+  })),
+});
+
+dash.calc('capacidad_kpi', {
+  inputs: ['municipios_2024'], title: 'Capacidad institucional, 2024',
+  description: 'Personal total, % con personal exclusivo de rentas, % con pago en línea y mediana de ingresos propios por trabajador.',
+  fn: (municipios) => [{
+    personal_total: d3.sum(municipios, (r) => num(r.personal_total) || 0),
+    pct_con_rentas: r1(100 * d3.mean(municipios, (r) => num(r.tiene_personal_rentas) || 0)),
+    pct_pago_en_linea: r1(100 * d3.mean(municipios, (r) => num(r.pago_en_linea) || 0)),
+    mediana_propios_por_trabajador: Math.round(mediana(municipios.filter((r) => num(r.personal_total) > 0).map((r) => (num(r.propios) || 0) / num(r.personal_total)))),
+  }],
+});
+
+dash.calc('productividad_clasif', {
+  inputs: ['municipios_2024'], title: 'Ingresos propios por trabajador, por clasificación',
+  description: 'Mediana de (ingresos propios ÷ personal total) por clasificación A–G, 2024.',
+  fn: (municipios) => [...CLASIF, 'Sin clasificación'].map((c) => {
+    const g = municipios.filter((r) => (r.clasificacion_pi || 'Sin clasificación') === c && num(r.personal_total) > 0);
+    return { clasificacion: c, soles_por_trabajador: Math.round(mediana(g.map((r) => (num(r.propios) || 0) / num(r.personal_total))) || 0), municipalidades: g.length };
+  }).filter((r) => r.municipalidades > 0),
+});
+
+dash.calc('equipamiento_clasif', {
+  inputs: ['municipios_2024'], title: 'Computadoras con internet por cada 10 trabajadores',
+  description: 'Mediana de (computadoras con internet ÷ personal total × 10) por clasificación A–G, 2024.',
+  fn: (municipios) => [...CLASIF, 'Sin clasificación'].map((c) => {
+    const g = municipios.filter((r) => (r.clasificacion_pi || 'Sin clasificación') === c && num(r.personal_total) > 0 && num(r.compus_internet) !== null);
+    return { clasificacion: c, compus_por_10: r1(mediana(g.map((r) => 10 * num(r.compus_internet) / num(r.personal_total))) || 0), municipalidades: g.length };
+  }).filter((r) => r.municipalidades > 0),
+});
+
+dash.calc('gestion_clasif', {
+  inputs: ['municipios_2024'], title: 'Herramientas de gestión por clasificación',
+  description: '% de municipalidades con personal exclusivo de rentas, pago en línea y oficina ambiental, por clasificación A–G, 2024.',
+  fn: (municipios) => [...CLASIF, 'Sin clasificación'].map((c) => {
+    const g = municipios.filter((r) => (r.clasificacion_pi || 'Sin clasificación') === c);
+    const p = (k) => r1(100 * d3.mean(g, (r) => num(r[k]) || 0));
+    return { clasificacion: c, pct_rentas: p('tiene_personal_rentas'), pct_pago_linea: p('pago_en_linea'), pct_oficina_ambiental: p('oficina_ambiental'), municipalidades: g.length };
+  }).filter((r) => r.municipalidades > 0),
+});
+
+dash.calc('peso_predial', {
+  inputs: ['municipios_2024'], title: 'Peso del predial en los ingresos propios',
+  description: 'Mediana de (predial ÷ ingresos propios) por municipalidad con ingresos propios, por clasificación A–G, 2024.',
+  fn: (municipios) => [...CLASIF, 'Sin clasificación'].map((c) => {
+    const g = municipios.filter((r) => (r.clasificacion_pi || 'Sin clasificación') === c && num(r.propios) > 0);
+    return { clasificacion: c, peso_pct: r1(100 * (mediana(g.map((r) => (num(r.predial) || 0) / num(r.propios))) || 0)), municipalidades: g.length };
+  }).filter((r) => r.municipalidades > 0),
+});
+
+dash.calc('predial_rentas', {
+  inputs: ['municipios_2024'], title: 'Predial con y sin personal de rentas',
+  description: 'Mediana del predial recaudado por municipalidad (miles de soles), según tenga o no personal exclusivo de rentas, por clasificación A–G, 2024.',
+  fn: (municipios) => CLASIF.map((c) => {
+    const g = municipios.filter((r) => r.clasificacion_pi === c);
+    const med = (t) => mediana(g.filter((r) => num(r.tiene_personal_rentas) === t).map((r) => (num(r.predial) || 0) / 1000));
+    const con = med(1), sin = med(0);
+    return { clasificacion: c, con_rentas_miles: con === null ? null : r1(con), sin_rentas_miles: sin === null ? null : r1(sin) };
+  }),
+});
+
+dash.calc('servicios_kpi', {
+  inputs: ['municipios_2024'], title: 'Servicios, 2024',
+  description: '% con serenazgo, efectivos de serenazgo, % con relleno sanitario y beneficiarios del Vaso de Leche (RENAMU 2025).',
+  fn: (municipios) => [{
+    pct_serenazgo: r1(100 * d3.mean(municipios, (r) => num(r.tiene_serenazgo) || 0)),
+    serenos: d3.sum(municipios, (r) => num(r.serenos) || 0),
+    pct_relleno: r1(100 * d3.mean(municipios.filter((r) => num(r.relleno_sanitario) !== null), (r) => num(r.relleno_sanitario))),
+    vaso_leche: d3.sum(municipios, (r) => num(r.vaso_leche_benef) || 0),
+  }],
+});
+
+dash.calc('servicios_quintil', {
+  inputs: ['municipios_2024'], title: 'Servicios por quintil de ingresos propios',
+  description: 'Municipalidades ordenadas por ingresos propios 2024 y divididas en 5 grupos iguales; % de cada grupo con serenazgo, relleno sanitario y oficina ambiental.',
+  fn: (municipios) => {
+    const s = municipios.filter((r) => num(r.recaudado) !== null).sort((a, b) => (num(a.propios) || 0) - (num(b.propios) || 0));
+    const n = s.length;
+    return d3.range(5).map((q) => {
+      const g = s.slice(Math.floor(q * n / 5), Math.floor((q + 1) * n / 5));
+      const p = (k) => r1(100 * d3.mean(g.filter((r) => num(r[k]) !== null), (r) => num(r[k])));
+      return { quintil: 'Q' + (q + 1), pct_serenazgo: p('tiene_serenazgo'), pct_relleno: p('relleno_sanitario'), pct_oficina_ambiental: p('oficina_ambiental'), municipalidades: g.length };
+    });
+  },
+});
+
+dash.calc('residuos_clasif', {
+  inputs: ['municipios_2024'], title: 'Destino de los residuos por clasificación',
+  description: '% de municipalidades con relleno sanitario y % promedio de lo recogido que va a botadero, por clasificación A–G, 2024.',
+  fn: (municipios) => [...CLASIF, 'Sin clasificación'].map((c) => {
+    const g = municipios.filter((r) => (r.clasificacion_pi || 'Sin clasificación') === c);
+    const rel = g.filter((r) => num(r.relleno_sanitario) !== null), bot = g.filter((r) => num(r.pct_botadero) !== null);
+    return { clasificacion: c, pct_relleno: r1(100 * d3.mean(rel, (r) => num(r.relleno_sanitario))), pct_botadero: bot.length ? r1(d3.mean(bot, (r) => num(r.pct_botadero))) : null, municipalidades: g.length };
+  }).filter((r) => r.municipalidades > 0),
+});
+
+dash.calc('serenazgo_clasif', {
+  inputs: ['municipios_2024'], title: 'Serenazgo por clasificación',
+  description: 'Entre las municipalidades con serenazgo: mediana de efectivos y unidades operativas (autos y motos) por cada 10 serenos, por clasificación A–G, 2024.',
+  fn: (municipios) => [...CLASIF, 'Sin clasificación'].map((c) => {
+    const g = municipios.filter((r) => (r.clasificacion_pi || 'Sin clasificación') === c && num(r.tiene_serenazgo) === 1 && num(r.serenos) > 0);
+    const u = g.filter((r) => num(r.unidades_serenazgo_operativas) !== null);
+    return { clasificacion: c, mediana_serenos: Math.round(mediana(g.map((r) => num(r.serenos))) || 0),
+      unidades_por_10: u.length ? r1(10 * d3.sum(u, (r) => num(r.unidades_serenazgo_operativas)) / d3.sum(u, (r) => num(r.serenos))) : null, municipalidades: g.length };
+  }).filter((r) => r.municipalidades > 0),
+});
+
+dash.calc('vaso_depto', {
+  inputs: ['municipios_2024'], title: 'Vaso de Leche por departamento',
+  description: 'Beneficiarios del Vaso de Leche por departamento, en miles, 2024 (RENAMU 2025).',
+  fn: (municipios) => Array.from(d3.rollup(municipios, (g) => d3.sum(g, (r) => num(r.vaso_leche_benef) || 0), (r) => r.departamento))
+    .map(([departamento, v]) => ({ departamento: departamento.replace('PROVINCIA CONSTITUCIONAL DEL ', ''), miles: r1(v / 1000) }))
+    .sort((a, b) => b.miles - a.miles),
+});
+
+const grupoDe = (r) => r.clasificacion_pi || 'Sin clasificación';
+const pctl = (v, vals) => { const g = vals.filter((x) => x !== null && isFinite(x)); if (v === null || !g.length) return null;
+  return r1(100 * (g.filter((x) => x < v).length + 0.5 * g.filter((x) => x === v).length) / g.length); };
+const elegida = (municipios) => { const u = (dash.params().ubigeo || '').toString(); return municipios.find((r) => r.ubigeo === u) || null; };
+
+dash.calc('ficha', {
+  inputs: ['municipios_2024'], title: 'Ficha de la municipalidad elegida (2024)',
+  description: 'Valores de la municipalidad elegida y la mediana de su grupo (misma clasificación A–G): recaudado, % de ejecución, % de autonomía, personal e ingresos propios por trabajador.',
+  fn: (municipios) => {
+    const m = elegida(municipios); if (!m) return [];
+    const g = municipios.filter((r) => grupoDe(r) === grupoDe(m));
+    const ind = {
+      recaudado_miles: (r) => (num(r.recaudado) === null ? null : num(r.recaudado) / 1000),
+      ejecucion_pct: (r) => (num(r.pim) > 0 ? 100 * num(r.recaudado) / num(r.pim) : null),
+      autonomia_pct: (r) => (num(r.recaudado) > 0 ? 100 * (num(r.propios) || 0) / num(r.recaudado) : null),
+      personal: (r) => num(r.personal_total),
+      propios_por_trabajador: (r) => (num(r.personal_total) > 0 ? (num(r.propios) || 0) / num(r.personal_total) : null),
+    };
+    const fila = { ubigeo: m.ubigeo, nombre: m.nombre, tipo: m.tipo, grupo: grupoDe(m), n_grupo: g.length };
+    Object.entries(ind).forEach(([k, f]) => {
+      const v = f(m), med = mediana(g.map(f));
+      const red = k.endsWith('_pct') ? r1 : Math.round;
+      fila[k] = v === null ? null : red(v); fila['g_' + k] = med === null ? null : red(med);
+    });
+    return [fila];
+  },
+});
+
+dash.calc('ficha_serie', {
+  inputs: ['siaf_municipio_anual'], title: 'Serie anual de la municipalidad elegida',
+  description: 'PIM, recaudado e ingresos propios por año (miles de soles), 2009–2025.',
+  fn: (serie) => { const u = (dash.params().ubigeo || '').toString();
+    return serie.filter((r) => r.ubigeo === u).map((r) => ({ anio: +r.anio, pim_miles: +r.pim_miles, recaudado_miles: +r.recaudado_miles, propios_miles: +r.propios_miles || 0 })); },
+});
+
+dash.calc('ficha_fuentes', {
+  inputs: ['municipios_2024'], title: 'Fuentes del dinero: municipalidad vs. grupo',
+  description: '% del recaudado 2024 por fuente (propios, FONCOMUN, canon, donaciones y transferencias, crédito, otros) de la municipalidad y promedio de su grupo.',
+  fn: (municipios) => {
+    const m = elegida(municipios); if (!m) return [];
+    const F = { Propios: 'propios', FONCOMUN: 'foncomun', 'Canon y regalías': 'canon', 'Donaciones y transferencias': 'donaciones', 'Crédito': 'credito' };
+    const partes = (r) => { const tot = num(r.recaudado); if (!(tot > 0)) return null; const o = {}; let suma = 0;
+      Object.entries(F).forEach(([n, k]) => { o[n] = 100 * (num(r[k]) || 0) / tot; suma += o[n]; }); o.Otros = Math.max(0, 100 - suma); return o; };
+    const pm = partes(m); if (!pm) return [];
+    const g = municipios.filter((r) => grupoDe(r) === grupoDe(m)).map(partes).filter(Boolean);
+    const out = [];
+    Object.keys(pm).forEach((n) => {
+      out.push({ quien: 'Esta municipalidad', fuente: n, pct: r1(pm[n]) });
+      out.push({ quien: 'Promedio del grupo', fuente: n, pct: r1(d3.mean(g, (o) => o[n])) });
+    });
+    return out;
+  },
+});
+
+dash.calc('ficha_percentiles', {
+  inputs: ['municipios_2024'], title: 'Posición de la municipalidad en su grupo',
+  description: 'Percentil de la municipalidad elegida dentro de su grupo A–G en seis indicadores de 2024 (50 = mediana).',
+  fn: (municipios) => {
+    const m = elegida(municipios); if (!m) return [];
+    const g = municipios.filter((r) => grupoDe(r) === grupoDe(m));
+    const IND = [
+      ['% de autonomía fiscal', (r) => (num(r.recaudado) > 0 ? 100 * (num(r.propios) || 0) / num(r.recaudado) : null)],
+      ['% de ejecución', (r) => (num(r.pim) > 0 ? 100 * num(r.recaudado) / num(r.pim) : null)],
+      ['Ingresos propios por trabajador', (r) => (num(r.personal_total) > 0 ? (num(r.propios) || 0) / num(r.personal_total) : null)],
+      ['Predial recaudado', (r) => num(r.predial) || 0],
+      ['Computadoras por cada 10 trabajadores', (r) => (num(r.personal_total) > 0 && num(r.compus_internet) !== null ? 10 * num(r.compus_internet) / num(r.personal_total) : null)],
+      ['Efectivos de serenazgo', (r) => num(r.serenos) || 0],
+    ];
+    return IND.map(([indicador, f]) => ({ indicador, percentil: pctl(f(m), g.map(f)) })).filter((r) => r.percentil !== null);
+  },
+});
+
+dash.calc('ficha_servicios', {
+  inputs: ['municipios_2024'], title: 'Servicios de la municipalidad vs. su grupo',
+  description: 'Servicios y herramientas de gestión de la municipalidad elegida (RENAMU 2025, describe 2024) y % de su grupo que los tiene.',
+  fn: (municipios) => {
+    const m = elegida(municipios); if (!m) return [];
+    const g = municipios.filter((r) => grupoDe(r) === grupoDe(m));
+    const pg = (k) => r1(100 * d3.mean(g.filter((r) => num(r[k]) !== null), (r) => num(r[k])));
+    const si = (v) => (v === 1 ? 'Sí' : v === 0 ? 'No' : '—');
+    const fmt = (v) => (v === null ? '—' : Math.round(v).toLocaleString('es-PE'));
+    return [
+      { indicador: 'Serenazgo', valor: num(m.tiene_serenazgo) === 1 ? `Sí, ${fmt(num(m.serenos))} efectivos` : si(num(m.tiene_serenazgo)), grupo: pg('tiene_serenazgo') },
+      { indicador: 'Relleno sanitario', valor: si(num(m.relleno_sanitario)), grupo: pg('relleno_sanitario') },
+      { indicador: 'Personal exclusivo de rentas', valor: num(m.tiene_personal_rentas) === 1 ? `Sí, ${fmt(num(m.personal_rentas))} personas` : si(num(m.tiene_personal_rentas)), grupo: pg('tiene_personal_rentas') },
+      { indicador: 'Pago en línea', valor: si(num(m.pago_en_linea)), grupo: pg('pago_en_linea') },
+      { indicador: 'Oficina ambiental', valor: si(num(m.oficina_ambiental)), grupo: pg('oficina_ambiental') },
+      { indicador: 'Residuos recogidos (kg por día)', valor: fmt(num(m.residuos_kg_dia)), grupo: null },
+      { indicador: 'Beneficiarios del Vaso de Leche', valor: fmt(num(m.vaso_leche_benef)), grupo: null },
+    ];
+  },
+});
+
+dash.calc('recorrido', {
+  inputs: ['calidad_volumenes'], title: 'Recorrido de las filas del SIAF',
+  description: 'Filas en Bronze, fuera de alcance y en Silver para la fuente F1.',
+  fn: (volumenes) => {
+    const b = volumenes.find((r) => r.capa === 'bronze' && r.fuente === 'F1');
+    const s = volumenes.find((r) => r.capa === 'silver' && r.fuente === 'F1');
+    if (!b || !s) return [];
+    return [
+      { etapa: 'Bronze (CSV)', filas: +b.filas },
+      { etapa: 'Fuera de alcance', filas: +s.filas_fuera_de_alcance },
+      { etapa: 'Silver', filas: +s.filas },
+    ];
+  },
+});
+</script>
+
+<script>
+// ---------- Gráficos ----------
+(function () {
+  const L = d3.formatLocale({ decimal: ',', thousands: ' ', grouping: [3], currency: ['S/ ', ''] });
+  const f0 = L.format(',.0f'), f1 = L.format(',.1f');
+  const signo = (v) => (v > 0 ? '+' : v < 0 ? '−' : '') + f1(Math.abs(v));
+  const num = (v) => (v === null || v === undefined || v === '' ? null : +v);
+  const col = (i) => dash.colors[i % dash.colors.length];
+
+  function vacio(el, st) {
+    el.replaceChildren();
+    const p = document.createElement('p'); p.className = 'v-empty';
+    p.textContent = st === 'error' ? 'No se pudo cargar este dato.' : '—';
+    el.append(p);
+  }
+  function tip(box) {
+    const t = document.createElement('div'); t.className = 'v-tip'; t.hidden = true; box.append(t);
+    return {
+      show(lineas, x, y) {
+        t.replaceChildren(...lineas.map((l, i) => { const d = document.createElement('div'); d.textContent = l; if (i === 0) d.className = 'v-tip-h'; return d; }));
+        t.hidden = false;
+        const bw = box.clientWidth, tw = t.offsetWidth;
+        t.style.left = Math.max(0, Math.min(x + 12, bw - tw)) + 'px';
+        t.style.top = Math.max(0, y - 36) + 'px';
+      },
+      hide() { t.hidden = true; },
+    };
+  }
+  function leyenda(el, items) {
+    if (items.length < 2) return;
+    const d = document.createElement('div'); d.className = 'v-legend';
+    items.forEach((it, i) => { const s = document.createElement('span'); const k = document.createElement('i'); k.style.background = col(i); s.append(k, document.createTextNode(it)); d.append(s); });
+    el.append(d);
+  }
+  function lienzo(el, h, aria) {
+    const w = Math.max(260, el.clientWidth || 400);
+    const svg = d3.select(el).append('svg').attr('width', '100%').attr('height', h).attr('viewBox', `0 0 ${w} ${h}`).attr('role', 'img').attr('aria-label', aria);
+    return { svg, w, h };
+  }
+  function ejeY(svg, y, fmt, ticks) {
+    const g = svg.append('g').attr('class', 'v-axis');
+    g.call(d3.axisLeft(y).ticks(ticks).tickFormat(fmt).tickSize(0)).call((s) => s.select('.domain').remove());
+    let m = 0; g.selectAll('text').each(function () { m = Math.max(m, this.getComputedTextLength()); });
+    return { g, ancho: m + 8 };
+  }
+  function topeRedondo(x, y, w, h, r) { // barra vertical con esquinas superiores redondeadas
+    r = Math.min(r, w / 2, Math.abs(h));
+    if (h <= 0) return '';
+    return `M${x},${y + h}V${y + r}Q${x},${y} ${x + r},${y}H${x + w - r}Q${x + w},${y} ${x + w},${y + r}V${y + h}Z`;
+  }
+
+  // Columnas agrupadas: rows [{x, ...}], series [{key, label}]
+  function columnas(el, { rows, x, series, fmt, xfmt = (v) => v, h = 240, aria, etiquetas = true, max }) {
+    el.replaceChildren();
+    leyenda(el, series.map((s) => s.label));
+    const { svg, w } = lienzo(el, h, aria);
+    const top = 18, bottom = 24;
+    const ymax = max ?? d3.max(rows, (r) => d3.max(series, (s) => r[s.key] ?? 0)) * 1.08;
+    const y = d3.scaleLinear().domain([0, ymax || 1]).nice().range([h - bottom, top]);
+    const ax = ejeY(svg, y, fmt, 4);
+    const left = ax.ancho;
+    ax.g.attr('transform', `translate(${left - 4},0)`);
+    svg.insert('g', ':first-child').attr('class', 'v-grid').selectAll('line').data(y.ticks(4)).join('line')
+      .attr('x1', left).attr('x2', w).attr('y1', (d) => y(d)).attr('y2', (d) => y(d));
+    const x0 = d3.scaleBand().domain(rows.map((r) => r[x])).range([left, w]).paddingInner(0.25).paddingOuter(0.1);
+    const x1 = d3.scaleBand().domain(series.map((s) => s.key)).range([0, x0.bandwidth()]).padding(series.length > 1 ? 0.08 : 0);
+    svg.append('g').attr('class', 'v-axis').attr('transform', `translate(0,${h - bottom})`)
+      .call(d3.axisBottom(x0).tickFormat(xfmt).tickSize(0)).call((s) => s.select('.domain').remove()).selectAll('text').attr('dy', '1em');
+    const t = tip(el);
+    series.forEach((s, i) => {
+      const g = svg.append('g').style('fill', col(i));
+      g.selectAll('path').data(rows.filter((r) => r[s.key] !== null && r[s.key] !== undefined)).join('path')
+        .attr('d', (r) => topeRedondo(x0(r[x]) + x1(s.key), y(r[s.key]), x1.bandwidth(), y(0) - y(r[s.key]), 3))
+        .on('pointermove', (ev, r) => { const [px, py] = d3.pointer(ev, el); t.show([String(xfmt(r[x])), `${s.label}: ${fmt(r[s.key])}`], px, py); })
+        .on('pointerleave', () => t.hide());
+      if (etiquetas && series.length === 1 && rows.length <= 12) {
+        svg.append('g').selectAll('text').data(rows).join('text').attr('class', 'v-val').attr('text-anchor', 'middle')
+          .attr('x', (r) => x0(r[x]) + x0.bandwidth() / 2).attr('y', (r) => y(r[s.key]) - 4).text((r) => fmt(r[s.key]));
+      }
+    });
+  }
+
+  // Líneas: rows [{x(num), ...}], series [{key,label}]; el último x se marca como parcial si parcial=true
+  function lineas(el, { rows, x, series, fmt, h = 240, aria, parcial }) {
+    el.replaceChildren();
+    leyenda(el, series.map((s) => s.label));
+    const { svg, w } = lienzo(el, h, aria);
+    const top = 14, bottom = 24;
+    const y = d3.scaleLinear().domain([0, d3.max(rows, (r) => d3.max(series, (s) => r[s.key])) * 1.08]).nice().range([h - bottom, top]);
+    const ax = ejeY(svg, y, fmt, 4);
+    const left = ax.ancho;
+    ax.g.attr('transform', `translate(${left - 4},0)`);
+    const right = 16;
+    const xs = d3.scalePoint().domain(rows.map((r) => r[x])).range([left + 10, w - right]);
+    svg.insert('g', ':first-child').attr('class', 'v-grid').selectAll('line').data(y.ticks(4)).join('line')
+      .attr('x1', left).attr('x2', w).attr('y1', (d) => y(d)).attr('y2', (d) => y(d));
+    svg.append('g').attr('class', 'v-axis').attr('transform', `translate(0,${h - bottom})`)
+      .call(d3.axisBottom(xs).tickSize(0).tickFormat((v) => (parcial && v === rows[rows.length - 1][x] ? v + '*' : v)))
+      .call((s) => s.select('.domain').remove()).selectAll('text').attr('dy', '1em');
+    series.forEach((s, i) => {
+      svg.append('path').datum(rows).attr('fill', 'none').style('stroke', col(i)).attr('stroke-width', 2)
+        .attr('d', d3.line().x((r) => xs(r[x])).y((r) => y(r[s.key])));
+      svg.append('g').selectAll('circle').data(rows).join('circle').attr('r', 4).attr('cx', (r) => xs(r[x])).attr('cy', (r) => y(r[s.key]))
+        .style('fill', (r, k) => (parcial && k === rows.length - 1 ? 'var(--color-panel)' : col(i))).style('stroke', col(i)).attr('stroke-width', 2);
+    });
+    const guia = svg.append('line').attr('y1', top).attr('y2', h - bottom).style('stroke', 'var(--cds-chart-reference)').attr('opacity', 0);
+    const t = tip(el);
+    svg.append('rect').attr('x', left).attr('y', 0).attr('width', w - left).attr('height', h).attr('fill', 'transparent')
+      .on('pointermove', (ev) => {
+        const [px, py] = d3.pointer(ev, svg.node());
+        const r = rows.reduce((a, b) => (Math.abs(xs(b[x]) - px) < Math.abs(xs(a[x]) - px) ? b : a));
+        guia.attr('x1', xs(r[x])).attr('x2', xs(r[x])).attr('opacity', 1);
+        const [ex, ey] = d3.pointer(ev, el);
+        t.show([String(r[x]) + (parcial && r === rows[rows.length - 1] ? ' (parcial)' : ''), ...series.map((s) => `${s.label}: ${fmt(r[s.key])}`)], ex, ey);
+      })
+      .on('pointerleave', () => { guia.attr('opacity', 0); t.hide(); });
+  }
+
+  // Barras horizontales con etiqueta de valor
+  function barrasH(el, { rows, label, key, fmt, aria, alto = 22, max }) {
+    el.replaceChildren();
+    const h = rows.length * alto + 10;
+    const { svg, w } = lienzo(el, h, aria);
+    const tmp = svg.append('g');
+    let m = 0; rows.forEach((r) => { const tx = tmp.append('text').text(r[label]); m = Math.max(m, tx.node().getComputedTextLength()); });
+    tmp.remove();
+    const left = m + 10, right = 52;
+    const x = d3.scaleLinear().domain([0, max ?? (d3.max(rows, (r) => r[key]) || 1)]).range([left, w - right]);
+    const y = d3.scaleBand().domain(rows.map((r) => r[label])).range([4, h - 6]).padding(0.25);
+    svg.append('g').selectAll('text').data(rows).join('text').attr('x', left - 6).attr('y', (r) => y(r[label]) + y.bandwidth() / 2).attr('dy', '0.35em').attr('text-anchor', 'end').text((r) => r[label]);
+    const t = tip(el);
+    svg.append('g').style('fill', col(0)).selectAll('rect').data(rows).join('rect')
+      .attr('x', left).attr('y', (r) => y(r[label])).attr('height', y.bandwidth()).attr('width', (r) => Math.max(0, x(r[key]) - left)).attr('rx', 2)
+      .on('pointermove', (ev, r) => { const [px, py] = d3.pointer(ev, el); t.show([r[label], fmt(r[key])], px, py); })
+      .on('pointerleave', () => t.hide());
+    svg.append('g').selectAll('text').data(rows).join('text').attr('class', 'v-val').attr('x', (r) => x(r[key]) + 4).attr('y', (r) => y(r[label]) + y.bandwidth() / 2).attr('dy', '0.35em').text((r) => fmt(r[key]));
+  }
+
+  // Pesas (dumbbell): dos valores por fila
+  function pesas(el, { rows, label, a, b, la, lb, fmt, aria, alto = 18 }) {
+    el.replaceChildren();
+    leyenda(el, [la, lb]);
+    const h = rows.length * alto + 28;
+    const { svg, w } = lienzo(el, h, aria);
+    const tmp = svg.append('g'); let m = 0;
+    rows.forEach((r) => { const tx = tmp.append('text').text(r[label]); m = Math.max(m, tx.node().getComputedTextLength()); });
+    tmp.remove();
+    const left = m + 10, right = 40;
+    const x = d3.scaleLinear().domain([0, d3.max(rows, (r) => Math.max(r[a] ?? 0, r[b] ?? 0))]).nice().range([left, w - right]);
+    const y = d3.scalePoint().domain(rows.map((r) => r[label])).range([10, h - 26]);
+    svg.insert('g', ':first-child').attr('class', 'v-grid').selectAll('line').data(x.ticks(5)).join('line').attr('x1', (d) => x(d)).attr('x2', (d) => x(d)).attr('y1', 0).attr('y2', h - 22);
+    svg.append('g').attr('class', 'v-axis').attr('transform', `translate(0,${h - 20})`).call(d3.axisBottom(x).ticks(5).tickFormat((v) => v + ' %').tickSize(0)).call((s) => s.select('.domain').remove());
+    svg.append('g').selectAll('text').data(rows).join('text').attr('x', left - 6).attr('y', (r) => y(r[label])).attr('dy', '0.35em').attr('text-anchor', 'end').text((r) => r[label]);
+    svg.append('g').selectAll('line').data(rows.filter((r) => r[a] !== null)).join('line').style('stroke', 'var(--cds-chart-reference)').attr('stroke-width', 2)
+      .attr('x1', (r) => x(r[a])).attr('x2', (r) => x(r[b])).attr('y1', (r) => y(r[label])).attr('y2', (r) => y(r[label]));
+    const t = tip(el);
+    [[a, 0, la], [b, 1, lb]].forEach(([k, i, nombre]) => {
+      svg.append('g').style('fill', col(i)).selectAll('circle').data(rows.filter((r) => r[k] !== null)).join('circle').attr('r', 5)
+        .attr('cx', (r) => x(r[k])).attr('cy', (r) => y(r[label])).style('stroke', 'var(--color-panel)').attr('stroke-width', 2)
+        .on('pointermove', (ev, r) => { const [px, py] = d3.pointer(ev, el); t.show([r[label], `${la}: ${fmt(r[a])}`, `${lb}: ${fmt(r[b])}`], px, py); })
+        .on('pointerleave', () => t.hide());
+    });
+  }
+
+  // Columnas apiladas al 100 %: largo [{x, grupo, pct}]
+  function apiladas(el, { rows, x, grupo, orden, aria, h = 250 }) {
+    el.replaceChildren();
+    leyenda(el, orden);
+    const { svg, w } = lienzo(el, h, aria);
+    const top = 6, bottom = 24;
+    const xsVals = Array.from(new Set(rows.map((r) => r[x]))).sort();
+    const ancho = xsVals.map((xv) => { const o = { [x]: xv }; orden.forEach((g) => { o[g] = (rows.find((r) => r[x] === xv && r[grupo] === g) || {}).pct || 0; }); return o; });
+    const y = d3.scaleLinear().domain([0, 100]).range([h - bottom, top]);
+    const ax = ejeY(svg, y, (v) => v + ' %', 4);
+    const left = ax.ancho; ax.g.attr('transform', `translate(${left - 4},0)`);
+    const xb = d3.scaleBand().domain(xsVals).range([left, w]).padding(0.3);
+    svg.append('g').attr('class', 'v-axis').attr('transform', `translate(0,${h - bottom})`).call(d3.axisBottom(xb).tickSize(0)).call((s) => s.select('.domain').remove()).selectAll('text').attr('dy', '1em');
+    const pila = d3.stack().keys(orden)(ancho);
+    const t = tip(el);
+    pila.forEach((capa, i) => {
+      svg.append('g').style('fill', col(i)).selectAll('rect').data(capa).join('rect')
+        .attr('x', (d) => xb(d.data[x])).attr('width', xb.bandwidth()).attr('y', (d) => y(d[1])).attr('height', (d) => Math.max(0, y(d[0]) - y(d[1]) - 2))
+        .on('pointermove', (ev, d) => { const [px, py] = d3.pointer(ev, el); t.show([String(d.data[x]), `${capa.key}: ${f1(d[1] - d[0])} %`], px, py); })
+        .on('pointerleave', () => t.hide());
+    });
+  }
+
+  // Dispersión log-log por grupo
+  function dispersion(el, { rows, x, y, grupo, grupos, xlab, ylab, aria, h = 300 }) {
+    el.replaceChildren();
+    leyenda(el, grupos);
+    const { svg, w } = lienzo(el, h, aria);
+    const top = 10, bottom = 34;
+    const fy = (v) => (v >= 1e6 ? f0(v / 1e6) + ' M' : v >= 1e3 ? f0(v / 1e3) + ' mil' : f0(v));
+    const ys = d3.scaleLog().domain(d3.extent(rows, (r) => r[y])).nice().range([h - bottom, top]);
+    const ax = ejeY(svg, ys, fy, 5);
+    const left = ax.ancho + 4; ax.g.attr('transform', `translate(${left - 4},0)`);
+    const xs = d3.scaleLog().domain(d3.extent(rows, (r) => r[x])).nice().range([left + 4, w - 10]);
+    svg.append('g').attr('class', 'v-axis').attr('transform', `translate(0,${h - bottom})`).call(d3.axisBottom(xs).ticks(5, '~s').tickSize(0)).call((s) => s.select('.domain').remove()).selectAll('text').attr('dy', '1em');
+    svg.append('text').attr('x', w - 10).attr('y', h - 2).attr('text-anchor', 'end').text(xlab);
+    svg.append('text').attr('x', left).attr('y', top - 2).text(ylab);
+    const t = tip(el);
+    grupos.forEach((gname, i) => {
+      svg.append('g').style('fill', col(i)).attr('fill-opacity', 0.55).selectAll('circle').data(rows.filter((r) => r[grupo] === gname)).join('circle')
+        .attr('r', 3.5).attr('cx', (r) => xs(r[x])).attr('cy', (r) => ys(r[y])).style('stroke', 'var(--color-panel)').attr('stroke-width', 1)
+        .on('pointermove', (ev, r) => { const [px, py] = d3.pointer(ev, el); t.show([`${r.departamento} · ${r.ubigeo}`, `${gname}`, `Personal: ${f0(r[x])}`, `Ingresos propios: S/ ${f0(r[y])}`], px, py); })
+        .on('pointerleave', () => t.hide());
+    });
+  }
+
+  // ---------- Textos y tarjetas ----------
+  const FMT = { entero: f0, dec: f1, signo };
+  function cifra(nombre, fuente, campo, tipo, fila = 0) {
+    dash.draw(nombre, (el) => {
+      const d = dash.data(fuente);
+      if (d.status !== 'ok' || !d.data || !d.data[fila]) { el.textContent = '—'; return; }
+      el.textContent = FMT[tipo](d.data[fila][campo]);
+    });
+  }
+  [['t1-rec', 'recaudado', 'entero'], ['t1-eje', 'ejecucion_pct', 'dec'], ['t1-var', 'var_recaudado_pct', 'signo'],
+   ['k1-rec', 'recaudado', 'entero'], ['k1-pim', 'pim', 'entero'], ['k1-eje', 'ejecucion_pct', 'dec'], ['k1-var', 'var_recaudado_pct', 'signo'],
+   ['t2-aut', 'autonomia_pct', 'dec'], ['t2-can', 'canon_pct', 'dec'], ['k2-pro', 'propios', 'entero'], ['k2-aut', 'autonomia_pct', 'dec'], ['k2-can', 'canon_pct', 'dec'],
+   ['t4-pre', 'predial', 'entero'], ['t4-var', 'var_predial_pct', 'signo'], ['k4-pre', 'predial', 'entero'], ['k4-var', 'var_predial_pct', 'signo'],
+  ].forEach(([n, c, t]) => cifra(n, 'kpi', c, t));
+  [['t3-per', 'personal_total', 'entero'], ['t3-ren', 'pct_con_rentas', 'dec'], ['t3-pxt', 'mediana_propios_por_trabajador', 'entero'],
+   ['k3-per', 'personal_total', 'entero'], ['k3-ren', 'pct_con_rentas', 'dec'], ['k3-lin', 'pct_pago_en_linea', 'dec'], ['k3-pxt', 'mediana_propios_por_trabajador', 'entero'],
+  ].forEach(([n, c, t]) => cifra(n, 'capacidad_kpi', c, t));
+  [['t5-ser', 'pct_serenazgo', 'dec'], ['t5-rel', 'pct_relleno', 'dec'], ['k5-ser', 'pct_serenazgo', 'dec'], ['k5-sns', 'serenos', 'entero'], ['k5-rel', 'pct_relleno', 'dec'], ['k5-vas', 'vaso_leche', 'entero']]
+    .forEach(([n, c, t]) => cifra(n, 'servicios_kpi', c, t));
+  [['t6-bro', 0], ['t6-fue', 1], ['t6-sil', 2]].forEach(([n, f]) => cifra(n, 'recorrido', 'filas', 'entero', f));
+
+  // ---------- Dibujos ----------
+  const conDatos = (el, fuente, fn) => { const d = dash.data(fuente); if (d.status !== 'ok' || !d.data || !d.data.length) { vacio(el, d.status); return; } fn(d.data); };
+  const mill = (v) => f0(v);
+  const pct = (v) => f1(v) + ' %';
+
+  dash.draw('ch-evolucion', (el) => conDatos(el, 'siaf_anual', (rows) => lineas(el, {
+    rows: rows.map((r) => ({ anio: +r.anio, pia: +r.pia_mill, pim: +r.pim_mill, rec: +r.recaudado_mill })), x: 'anio', parcial: true,
+    series: [{ key: 'pim', label: 'PIM' }, { key: 'rec', label: 'Recaudado' }, { key: 'pia', label: 'PIA' }], fmt: mill,
+    aria: 'Líneas de PIA, PIM y recaudado municipal por año, 2020 a 2026, en millones de soles',
+  })));
+  dash.draw('ch-categoria', (el) => conDatos(el, 'categoria_pct', (rows) => apiladas(el, {
+    rows: rows.filter((r) => r.anio <= 2025), x: 'anio', grupo: 'categoria', orden: ['I. Corrientes', 'III. Transferencias', 'IV. Financiamiento', 'II. Capital'],
+    aria: 'Columnas apiladas al 100 % con la composición del recaudado por categoría, 2020 a 2025',
+  })));
+  dash.draw('ch-estacionalidad', (el) => conDatos(el, 'estacionalidad', (rows) => columnas(el, {
+    rows, x: 'mes', series: [{ key: 'recaudado_mill', label: 'Recaudado' }], fmt: mill, etiquetas: false,
+    xfmt: (m) => ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Set', 'Oct', 'Nov', 'Dic'][m - 1],
+    aria: 'Columnas del recaudado municipal promedio por mes, 2020 a 2025',
+  })));
+  const METRICAS = {
+    ejecucion_pct: { nombre: '% de ejecución', fmt: pct }, autonomia_pct: { nombre: '% de autonomía', fmt: pct },
+    canon_pct: { nombre: '% del canon', fmt: pct }, recaudado_mill: { nombre: 'Recaudado (S/ mill.)', fmt: mill }, predial_mill: { nombre: 'Predial (S/ mill.)', fmt: f1 },
+  };
+  const eleccion = () => {
+    const m = document.getElementById('sel-metrica'), a = document.getElementById('sel-anio');
+    return { metrica: (m && METRICAS[m.value]) ? m.value : 'ejecucion_pct', anio: a ? +a.value : 2025 };
+  };
+  const colorReal = (el, css) => { const t = document.createElement('span'); t.style.color = css; el.append(t); const c = getComputedStyle(t).color; t.remove(); return c; };
+  dash.draw('ch-mapa', (el) => {
+    const g = dash.data('geo_departamentos'), d = dash.data('departamento_metricas');
+    if (g.status !== 'ok' || d.status !== 'ok' || !g.data || !g.data.features) { vacio(el, g.status === 'error' || d.status === 'error' ? 'error' : ''); return; }
+    const { metrica, anio } = eleccion();
+    const valores = new Map(d.data.filter((r) => r.anio === anio).map((r) => [r.cod, r]));
+    el.replaceChildren();
+    const w = Math.max(260, el.clientWidth || 360), h = Math.round(w * 1.25);
+    const proy = d3.geoIdentity().reflectY(true).fitSize([w, h - 30], g.data);
+    const ruta = d3.geoPath(proy);
+    const svg = d3.select(el).append('svg').attr('width', '100%').attr('height', h).attr('viewBox', `0 0 ${w} ${h}`).attr('role', 'img')
+      .attr('aria-label', `Mapa del Perú por departamento: ${METRICAS[metrica].nombre}, ${anio}`);
+    const vs = Array.from(valores.values()).map((r) => r[metrica]);
+    const ext = d3.extent(vs);
+    const bajo = colorReal(el, 'var(--color-border-line)'), alto = colorReal(el, dash.colors[0]);
+    const escala = d3.scaleLinear().domain(ext).range([0.12, 1]);
+    const color = (v) => d3.interpolateRgb(bajo, alto)(escala(v));
+    const t = tip(el);
+    svg.append('g').selectAll('path').data(g.data.features).join('path').attr('d', ruta)
+      .style('fill', (f) => { const r = valores.get(f.properties.cod); return r ? color(r[metrica]) : 'var(--color-border-line)'; })
+      .on('pointermove', (ev, f) => { const r = valores.get(f.properties.cod); const [px, py] = d3.pointer(ev, el);
+        t.show([f.properties.departamento, r ? `${METRICAS[metrica].nombre}: ${METRICAS[metrica].fmt(r[metrica])}` : 'Sin dato', `Año ${anio}`], px, py); })
+      .on('pointerleave', () => t.hide());
+    const esc = document.createElement('div'); esc.className = 'v-escala';
+    const a = document.createElement('span'); a.textContent = METRICAS[metrica].fmt(ext[0]);
+    const barra = document.createElement('i'); barra.style.background = `linear-gradient(90deg, ${color(ext[0])}, ${color(ext[1])})`;
+    const b = document.createElement('span'); b.textContent = METRICAS[metrica].fmt(ext[1]);
+    esc.append(a, barra, b); el.append(esc);
+  });
+  dash.draw('ch-depto-rank', (el) => conDatos(el, 'departamento_metricas', (rows) => {
+    const { metrica, anio } = eleccion();
+    const filas = rows.filter((r) => r.anio === anio).map((r) => ({ departamento: r.departamento, v: r[metrica] })).sort((x, y) => y.v - x.v);
+    barrasH(el, { rows: filas, label: 'departamento', key: 'v', fmt: METRICAS[metrica].fmt, alto: 17,
+      aria: `Ranking de departamentos por ${METRICAS[metrica].nombre} en ${anio}` });
+  }));
+
+  dash.draw('ch-mezcla', (el) => conDatos(el, 'mezcla', (rows) => apiladas(el, {
+    rows: rows.filter((r) => r.anio <= 2025), x: 'anio', grupo: 'fuente', orden: ['Propios', 'FONCOMUN', 'Canon y regalías', 'Donaciones y transferencias', 'Crédito', 'Otros'].filter((g) => rows.some((r) => r.fuente === g)),
+    aria: 'Columnas apiladas al 100 % del recaudado por fuente de financiamiento, 2020 a 2025',
+  })));
+  dash.draw('ch-aut-clasif', (el) => conDatos(el, 'autonomia_clasif', (rows) => columnas(el, {
+    rows, x: 'clasificacion', series: [{ key: 'autonomia_pct', label: 'Autonomía' }], fmt: pct, xfmt: (c) => (c === 'Sin clasificación' ? 'Sin clasif.' : c),
+    aria: 'Columnas de la autonomía fiscal promedio por clasificación A a G en 2024',
+  })));
+  dash.draw('k2-cob', (el) => {
+    const d = dash.data('cobertura'); const r = d.status === 'ok' ? (d.data || []).find((x) => x.anio === 2025) : null;
+    el.textContent = r ? f1(r.cobertura_pct) : '—';
+  });
+  dash.draw('ch-aut-evolucion', (el) => conDatos(el, 'autonomia_anual', (rows) => lineas(el, {
+    rows, x: 'anio', series: [{ key: 'autonomia_pct', label: 'Autonomía (propios)' }, { key: 'canon_pct', label: 'Canon y regalías' }], fmt: pct,
+    aria: 'Líneas del porcentaje de autonomía fiscal y del porcentaje del canon en el recaudado municipal, 2009 a 2025',
+  })));
+  dash.draw('ch-aut-depto', (el) => conDatos(el, 'autonomia_depto', (rows) => pesas(el, {
+    rows, label: 'departamento', a: 'aut_2009', b: 'aut_2025', la: '2009', lb: '2025', fmt: (v) => (v === null ? '—' : f1(v) + ' %'),
+    aria: 'Gráfico de pesas con la autonomía fiscal de cada departamento en 2009 y en 2025',
+  })));
+
+  dash.draw('ch-dispersion', (el) => conDatos(el, 'municipios_2024', (rows) => dispersion(el, {
+    rows: rows.map((r) => ({ ubigeo: r.ubigeo, departamento: r.departamento, tipo: r.tipo, personal: num(r.personal_total), propios: num(r.propios) }))
+      .filter((r) => r.personal > 0 && r.propios > 0),
+    x: 'personal', y: 'propios', grupo: 'tipo', grupos: ['DISTRITAL', 'PROVINCIAL'], xlab: 'Personal total →', ylab: '↑ Ingresos propios (S/)',
+    aria: 'Dispersión del personal total frente a los ingresos propios de cada municipalidad en 2024, escala logarítmica',
+  })));
+  dash.draw('ch-productividad', (el) => conDatos(el, 'productividad_clasif', (rows) => columnas(el, {
+    rows, x: 'clasificacion', series: [{ key: 'soles_por_trabajador', label: 'S/ por trabajador' }], fmt: f0, xfmt: (c) => (c === 'Sin clasificación' ? 'Sin clasif.' : c),
+    aria: 'Columnas de la mediana de ingresos propios por trabajador por clasificación A a G',
+  })));
+
+  dash.draw('ch-equipamiento', (el) => conDatos(el, 'equipamiento_clasif', (rows) => columnas(el, {
+    rows, x: 'clasificacion', series: [{ key: 'compus_por_10', label: 'Computadoras por cada 10 trabajadores' }], fmt: f1, xfmt: (c) => (c === 'Sin clasificación' ? 'Sin clasif.' : c),
+    aria: 'Columnas de la mediana de computadoras con internet por cada 10 trabajadores, por clasificación A a G',
+  })));
+  dash.draw('ch-gestion', (el) => conDatos(el, 'gestion_clasif', (rows) => columnas(el, {
+    rows, x: 'clasificacion', series: [{ key: 'pct_rentas', label: 'Personal de rentas' }, { key: 'pct_pago_linea', label: 'Pago en línea' }, { key: 'pct_oficina_ambiental', label: 'Oficina ambiental' }],
+    fmt: pct, max: 100, xfmt: (c) => (c === 'Sin clasificación' ? 'Sin clasif.' : c),
+    aria: 'Columnas agrupadas del porcentaje de municipalidades con personal de rentas, pago en línea y oficina ambiental, por clasificación A a G',
+  })));
+  dash.draw('ch-peso-predial', (el) => conDatos(el, 'peso_predial', (rows) => columnas(el, {
+    rows, x: 'clasificacion', series: [{ key: 'peso_pct', label: 'Predial ÷ ingresos propios' }], fmt: pct, xfmt: (c) => (c === 'Sin clasificación' ? 'Sin clasif.' : c),
+    aria: 'Columnas de la mediana del peso del predial en los ingresos propios, por clasificación A a G',
+  })));
+  dash.draw('ch-residuos', (el) => conDatos(el, 'residuos_clasif', (rows) => columnas(el, {
+    rows, x: 'clasificacion', series: [{ key: 'pct_relleno', label: 'Con relleno sanitario' }, { key: 'pct_botadero', label: 'Promedio que va a botadero' }],
+    fmt: pct, max: 100, xfmt: (c) => (c === 'Sin clasificación' ? 'Sin clasif.' : c),
+    aria: 'Columnas agrupadas del porcentaje con relleno sanitario y del porcentaje promedio a botadero, por clasificación A a G',
+  })));
+  dash.draw('ch-serenazgo', (el) => conDatos(el, 'serenazgo_clasif', (rows) => {
+    columnas(el, { rows, x: 'clasificacion', series: [{ key: 'mediana_serenos', label: 'Efectivos (mediana)' }], fmt: f0, xfmt: (c) => (c === 'Sin clasificación' ? 'Sin clasif.' : c),
+      aria: 'Columnas de la mediana de efectivos de serenazgo por clasificación A a G' });
+    d3.select(el).selectAll('path').filter(function () { return this.parentNode && this.parentNode.style.fill; })
+      .on('pointermove', function (ev, r) { const [px, py] = d3.pointer(ev, el); const t = el.querySelector('.v-tip');
+        if (!t) return; t.replaceChildren(...[String(r.clasificacion), `Efectivos (mediana): ${f0(r.mediana_serenos)}`, `Unidades operativas por cada 10 serenos: ${r.unidades_por_10 === null ? '—' : f1(r.unidades_por_10)}`, `Municipalidades: ${r.municipalidades}`]
+          .map((l, i) => { const d = document.createElement('div'); d.textContent = l; if (i === 0) d.className = 'v-tip-h'; return d; }));
+        t.hidden = false; t.style.left = Math.max(0, Math.min(px + 12, el.clientWidth - t.offsetWidth)) + 'px'; t.style.top = Math.max(0, py - 36) + 'px'; });
+  }));
+  dash.draw('ch-vaso', (el) => conDatos(el, 'vaso_depto', (rows) => barrasH(el, {
+    rows, label: 'departamento', key: 'miles', fmt: f1, alto: 17, aria: 'Barras de beneficiarios del Vaso de Leche por departamento, en miles',
+  })));
+  dash.draw('ch-predial-anual', (el) => conDatos(el, 'siaf_anual', (rows) => lineas(el, {
+    rows: rows.map((r) => ({ anio: +r.anio, predial: +r.predial_mill })), x: 'anio', parcial: true,
+    series: [{ key: 'predial', label: 'Predial' }], fmt: mill, aria: 'Línea del impuesto predial recaudado por año, 2020 a 2026',
+  })));
+  dash.draw('ch-predial-mes', (el) => conDatos(el, 'estacionalidad', (rows) => columnas(el, {
+    rows, x: 'mes', series: [{ key: 'predial_mill', label: 'Predial' }], fmt: mill, etiquetas: false,
+    xfmt: (m) => ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Set', 'Oct', 'Nov', 'Dic'][m - 1],
+    aria: 'Columnas del predial promedio por mes, 2020 a 2025',
+  })));
+  dash.draw('ch-predial-rentas', (el) => conDatos(el, 'predial_rentas', (rows) => columnas(el, {
+    rows, x: 'clasificacion', series: [{ key: 'con_rentas_miles', label: 'Con personal de rentas' }, { key: 'sin_rentas_miles', label: 'Sin personal de rentas' }], fmt: f1,
+    aria: 'Columnas agrupadas de la mediana del predial por municipalidad, con y sin personal de rentas, por clasificación A a G',
+  })));
+
+  dash.draw('ch-quintil', (el) => conDatos(el, 'servicios_quintil', (rows) => columnas(el, {
+    rows, x: 'quintil', series: [{ key: 'pct_serenazgo', label: 'Con serenazgo' }, { key: 'pct_relleno', label: 'Con relleno sanitario' }, { key: 'pct_oficina_ambiental', label: 'Con oficina ambiental' }],
+    fmt: pct, max: 100, aria: 'Columnas agrupadas del porcentaje de municipalidades con serenazgo, relleno sanitario y oficina ambiental por quintil de ingresos propios',
+  })));
+
+  dash.draw('ch-recorrido', (el) => conDatos(el, 'recorrido', (rows) => barrasH(el, {
+    rows, label: 'etapa', key: 'filas', fmt: f0, alto: 34, aria: 'Barras con las filas del SIAF en Bronze, fuera de alcance y en Silver',
+  })));
+
+  // ---------- Ficha por municipalidad ----------
+  const fichaCifra = (nombre, campo, tipo) => dash.draw(nombre, (el) => {
+    const d = dash.data('ficha'); const r = d.status === 'ok' && d.data ? d.data[0] : null;
+    el.textContent = !r || r[campo] === null || r[campo] === undefined ? '—' : (tipo === 'txt' ? String(r[campo]) : FMT[tipo](r[campo]));
+  });
+  [['f-nombre', 'nombre', 'txt'], ['f-tipo', 'tipo', 'txt'], ['f-clasif', 'grupo', 'txt'], ['f-ngrupo', 'n_grupo', 'entero'],
+   ['kf-rec', 'recaudado_miles', 'entero'], ['kf-rec-g', 'g_recaudado_miles', 'entero'], ['kf-eje', 'ejecucion_pct', 'dec'], ['kf-eje-g', 'g_ejecucion_pct', 'dec'],
+   ['kf-aut', 'autonomia_pct', 'dec'], ['kf-aut-g', 'g_autonomia_pct', 'dec'], ['kf-per', 'personal', 'entero'], ['kf-per-g', 'g_personal', 'entero'],
+   ['kf-pxt', 'propios_por_trabajador', 'entero'], ['kf-pxt-g', 'g_propios_por_trabajador', 'entero']].forEach(([n, c, t]) => fichaCifra(n, c, t));
+
+  dash.draw('sel-depto', (sel) => {
+    const d = dash.data('municipios_2024'); if (d.status !== 'ok') { sel.replaceChildren(); return; }
+    const deps = Array.from(d3.rollup(d.data, (g) => g[0].departamento, (r) => r.cod_depto)).sort((a, b) => a[1].localeCompare(b[1]));
+    sel.replaceChildren(...deps.map(([cod, nom]) => new Option(nom, cod)));
+    sel.value = (dash.params().depto || '').toString();
+    sel.onchange = () => {
+      const muns = d.data.filter((r) => r.cod_depto === sel.value).sort((a, b) => a.ubigeo.localeCompare(b.ubigeo));
+      dash.setParams({ depto: sel.value, ubigeo: muns.length ? muns[0].ubigeo : '' });
+    };
+  });
+  dash.draw('sel-muni', (sel) => {
+    const d = dash.data('municipios_2024'); if (d.status !== 'ok') { sel.replaceChildren(); return; }
+    const dep = (dash.params().depto || '').toString();
+    const muns = d.data.filter((r) => r.cod_depto === dep).sort((a, b) => (a.provincia + a.distrito).localeCompare(b.provincia + b.distrito));
+    sel.replaceChildren(...muns.map((r) => new Option(`${r.provincia} · ${r.distrito}${r.tipo === 'PROVINCIAL' ? ' (provincial)' : ''}`, r.ubigeo)));
+    sel.value = (dash.params().ubigeo || '').toString();
+    sel.onchange = () => dash.setParams({ ubigeo: sel.value });
+  });
+  dash.draw('ch-f-serie', (el) => conDatos(el, 'ficha_serie', (rows) => lineas(el, {
+    rows, x: 'anio', series: [{ key: 'pim_miles', label: 'PIM' }, { key: 'recaudado_miles', label: 'Recaudado' }, { key: 'propios_miles', label: 'Ingresos propios' }], fmt: f0,
+    aria: 'Líneas del PIM, el recaudado y los ingresos propios de la municipalidad elegida, 2009 a 2025, en miles de soles',
+  })));
+  dash.draw('ch-f-fuentes', (el) => conDatos(el, 'ficha_fuentes', (rows) => apiladas(el, {
+    rows, x: 'quien', grupo: 'fuente', orden: ['Propios', 'FONCOMUN', 'Canon y regalías', 'Donaciones y transferencias', 'Crédito', 'Otros'], h: 230,
+    aria: 'Columnas apiladas al 100 % con las fuentes del recaudado de la municipalidad y del promedio de su grupo',
+  })));
+  dash.draw('ch-f-posicion', (el) => conDatos(el, 'ficha_percentiles', (rows) => barrasH(el, {
+    rows, label: 'indicador', key: 'percentil', fmt: (v) => 'P' + f0(v), max: 100, alto: 30,
+    aria: 'Barras con el percentil de la municipalidad dentro de su grupo en seis indicadores',
+  })));
+  dash.draw('tb-f-servicios', (tb) => {
+    const d = dash.data('ficha_servicios'); tb.replaceChildren();
+    if (d.status !== 'ok') return;
+    d.data.forEach((r) => tb.append(fila([[r.indicador], [r.valor], [r.grupo === null ? '—' : f1(r.grupo) + ' % lo tiene', 'n']], encodeURIComponent(r.indicador))));
+  });
+
+  function fila(celdas, key) {
+    const tr = document.createElement('tr'); if (key) tr.dataset.key = key;
+    celdas.forEach(([txt, cls]) => { const td = document.createElement('td'); if (cls) td.className = cls; if (txt instanceof Node) td.append(txt); else td.textContent = txt; tr.append(td); });
+    return tr;
+  }
+  dash.draw('tb-volumenes', (tb) => {
+    const d = dash.data('calidad_volumenes'); tb.replaceChildren();
+    if (d.status !== 'ok') return;
+    d.data.forEach((r) => tb.append(fila([[r.capa], [r.fuente], [r.tabla], [f0(+r.filas), 'n'], [f1(+r.mb), 'n'], [r.fecha_datos]],
+      encodeURIComponent(r.capa) + ',' + encodeURIComponent(r.tabla))));
+  });
+  dash.draw('tb-reglas', (tb) => {
+    const d = dash.data('calidad_reglas'); tb.replaceChildren();
+    if (d.status !== 'ok') return;
+    d.data.forEach((r) => {
+      const p = document.createElement('span'); p.className = 'mp-pill ' + (r.estado === 'OK' ? 'ok' : r.estado === 'ALERTA' ? 'alerta' : 'mal'); p.textContent = r.estado;
+      tb.append(fila([[r.notebook], [r.regla], [r.accion], [r.fallidas === '' ? '—' : f0(+r.fallidas), 'n'], [p]], encodeURIComponent(r.notebook) + ',' + encodeURIComponent(r.regla)));
+    });
+  });
+})();
+</script>

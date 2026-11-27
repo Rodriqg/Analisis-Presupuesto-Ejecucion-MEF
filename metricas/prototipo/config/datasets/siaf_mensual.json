@@ -1,0 +1,15 @@
+{
+  "description": "Recaudado y predial por año y mes, en millones de soles, 2009–2026.",
+  "fixed": true,
+  "source": {
+    "format": "csv",
+    "kind": "file",
+    "name": "siaf_mensual.csv",
+    "url": "/_blob/ffaf95016a71d7a023754b4a1bf7c3f4"
+  },
+  "title": "SIAF: recaudado por mes",
+  "updated": {
+    "at": "2026-11-23T02:55:00Z",
+    "by": "Claude, desde data/silver/siaf_ingreso"
+  }
+}

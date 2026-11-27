@@ -1,0 +1,15 @@
+{
+  "description": "Resultado de cada regla en la última ejecución de 01_bronze_descarga, 03_siaf y 05b_silver_renamu (bitácoras).",
+  "fixed": true,
+  "source": {
+    "format": "csv",
+    "kind": "file",
+    "name": "calidad_reglas.csv",
+    "url": "/_blob/66c2c4315617db9faa36306d3f8b658c"
+  },
+  "title": "Reglas de calidad de la última carga",
+  "updated": {
+    "at": "2026-11-23T02:27:42Z",
+    "by": "Claude, desde las bitácoras del proyecto"
+  }
+}

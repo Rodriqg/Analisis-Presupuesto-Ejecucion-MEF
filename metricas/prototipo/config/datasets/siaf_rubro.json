@@ -1,0 +1,15 @@
+{
+  "description": "Recaudado por año y rubro de financiamiento, en millones de soles, 2009–2026.",
+  "fixed": true,
+  "source": {
+    "format": "csv",
+    "kind": "file",
+    "name": "siaf_rubro.csv",
+    "url": "/_blob/88822b1545b4fc6194afba7d508f5203"
+  },
+  "title": "SIAF: recaudado por rubro",
+  "updated": {
+    "at": "2026-11-23T02:55:00Z",
+    "by": "Claude, desde data/silver/siaf_ingreso"
+  }
+}

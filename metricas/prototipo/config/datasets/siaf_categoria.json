@@ -1,0 +1,15 @@
+{
+  "description": "Recaudado por año y categoría del RENAMU armada desde la genérica del SIAF, en millones de soles, 2009–2026.",
+  "fixed": true,
+  "source": {
+    "format": "csv",
+    "kind": "file",
+    "name": "siaf_categoria.csv",
+    "url": "/_blob/a4851d8e31ecda6c236a9db054f4d211"
+  },
+  "title": "SIAF: recaudado por categoría I–IV",
+  "updated": {
+    "at": "2026-11-23T02:55:00Z",
+    "by": "Claude, desde data/silver/siaf_ingreso"
+  }
+}

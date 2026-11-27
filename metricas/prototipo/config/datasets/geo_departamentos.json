@@ -1,0 +1,16 @@
+{
+  "description": "Polígonos de los 25 departamentos del Perú (GeoJSON simplificado, coordenadas redondeadas a 3 decimales), con su código de 2 dígitos del ubigeo.",
+  "fixed": true,
+  "link": "https://github.com/juaneladio/peru-geojson",
+  "source": {
+    "format": "json",
+    "kind": "file",
+    "name": "departamentos_peru.json",
+    "url": "/_blob/7bc4a452e88341f430e9d81eb3e8fa12"
+  },
+  "title": "Límites de los departamentos",
+  "updated": {
+    "at": "2026-11-23T02:55:00Z",
+    "by": "Claude, desde github.com/juaneladio/peru-geojson (peru_departamental_simple.geojson)"
+  }
+}

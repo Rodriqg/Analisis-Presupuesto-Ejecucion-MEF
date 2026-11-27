@@ -29,7 +29,6 @@ El proyecto debe cubrir:
 | F1 | SIAF: presupuesto y ejecución de ingreso (MEF) | `data/bronze/siaf_ingreso/` | 1 CSV por año; 2025 y 2026 desde el archivo *Diario* (D-005) |
 | F2 | SISMEPRE: meta del impuesto predial (MEF) | `data/bronze/sismepre_predial/` | 7 CSV relacionados; incluye la clasificación A–G de municipalidades (D-008) |
 | F3 | RENAMU: Registro Nacional de Municipalidades (INEI) | `data/bronze/renamu/` | 1 ZIP por edición, 2009–2026 (D-006, D-011) |
-| ~~F4~~ | ~~Categorías de municipalidades~~ | — | Descartada; la categoría se deriva de F2 y F3 (D-008) |
 
 Las URLs están en `config.yaml → fuentes`.
 

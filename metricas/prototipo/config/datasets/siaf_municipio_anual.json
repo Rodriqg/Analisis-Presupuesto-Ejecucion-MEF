@@ -1,0 +1,15 @@
+{
+  "description": "PIM, recaudado e ingresos propios por municipalidad (ubigeo) y año, en miles de soles, 2009–2025 (tabla Silver siaf_ingreso).",
+  "fixed": true,
+  "source": {
+    "format": "csv",
+    "kind": "file",
+    "name": "siaf_municipio_anual.csv",
+    "url": "/_blob/349771d7dcf56c8338fa576d22c5215f"
+  },
+  "title": "SIAF: serie anual por municipalidad",
+  "updated": {
+    "at": "2026-11-27T02:10:00Z",
+    "by": "Claude, desde data/silver/siaf_ingreso"
+  }
+}

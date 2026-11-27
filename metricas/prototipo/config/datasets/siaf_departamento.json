@@ -1,0 +1,15 @@
+{
+  "description": "PIA, PIM, recaudado, propios, canon y predial por departamento (2 primeros dígitos del ubigeo) y año, en millones de soles, 2009–2026.",
+  "fixed": true,
+  "source": {
+    "format": "csv",
+    "kind": "file",
+    "name": "siaf_departamento.csv",
+    "url": "/_blob/77a8d28d7214292f03b8719045489403"
+  },
+  "title": "SIAF: totales por departamento y año",
+  "updated": {
+    "at": "2026-11-23T02:55:00Z",
+    "by": "Claude, desde data/silver/siaf_ingreso"
+  }
+}

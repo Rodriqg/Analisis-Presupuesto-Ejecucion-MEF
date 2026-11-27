@@ -1,0 +1,15 @@
+{
+  "description": "Última medición de filas, tamaño y fecha de los datos de cada tabla (data/auditoria/volumenes.parquet).",
+  "fixed": true,
+  "source": {
+    "format": "csv",
+    "kind": "file",
+    "name": "calidad_volumenes.csv",
+    "url": "/_blob/3439141bd72e378a5e6cf6d1a945364e"
+  },
+  "title": "Volúmenes por capa y fuente",
+  "updated": {
+    "at": "2026-11-23T02:27:42Z",
+    "by": "Claude, desde data/auditoria"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "description": "Una fila por municipalidad: nombre (el último del SIAF), ubicación, SIAF 2024 por fuente (Silver), RENAMU 2025 que describe 2024 (leído de Bronze, preliminar), clasificación A–G del SISMEPRE (Bronze) y finanzas RENAMU (Silver).",
+  "fixed": true,
+  "source": {
+    "format": "csv",
+    "kind": "file",
+    "name": "municipios_2024.csv",
+    "url": "/_blob/4a7b9829dea91a6bb6a3bed9fc3608a3"
+  },
+  "title": "Municipalidades 2024: dinero, capacidad y servicios",
+  "updated": {
+    "at": "2026-11-27T02:10:00Z",
+    "by": "Claude, desde data/silver y data/bronze del proyecto"
+  }
+}

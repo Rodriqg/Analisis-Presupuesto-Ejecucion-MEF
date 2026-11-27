@@ -1,0 +1,15 @@
+{
+  "description": "Ingresos y gastos declarados por las municipalidades, por año del dato, en millones de soles (tabla Silver renamu_finanzas).",
+  "fixed": true,
+  "source": {
+    "format": "csv",
+    "kind": "file",
+    "name": "renamu_anual.csv",
+    "url": "/_blob/f59d3c39a53a3409fde70953cf0c50d8"
+  },
+  "title": "RENAMU: ingresos y gastos por año",
+  "updated": {
+    "at": "2026-11-23T02:27:42Z",
+    "by": "Claude, desde data/silver/renamu_finanzas"
+  }
+}

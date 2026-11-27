@@ -1,0 +1,15 @@
+{
+  "description": "PIA, PIM, recaudado, propios, transferencias, canon y predial de las municipalidades, en millones de soles, 2009–2026 (tabla Silver siaf_ingreso).",
+  "fixed": true,
+  "source": {
+    "format": "csv",
+    "kind": "file",
+    "name": "siaf_anual.csv",
+    "url": "/_blob/31464b0a59a49d55d3641841c00b3aae"
+  },
+  "title": "SIAF: totales por año",
+  "updated": {
+    "at": "2026-11-23T02:55:00Z",
+    "by": "Claude, desde data/silver/siaf_ingreso"
+  }
+}
